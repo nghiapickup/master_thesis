@@ -1,0 +1,48 @@
+Notice: Remove news_2 test -- similar output with news
+
+=====
+ssl_mincut_graphical_model III
+=====
+
+mincut_5_1
+	knn, mst, knn-mst
+	cv=5, 1
+	scale: 07, 09, 97
+	Spliter: cv 5
+	K search: cv 1
+	news_2 comp vs sci
+
+randomize_5_1
+	knn only
+	cv=5, 1
+	scale: 07, 09, 97
+	Spliter: cv 5
+	K search: cv 1
+	news_2 comp vs sci
+
+tree_5_1
+	mst, knn-mst
+	cv=5, 1
+	scale: 07, 09, 97
+	Spliter: cv 5
+	K search: cv 1
+	news_2 comp vs sci
+
+loop_1_fix (*2 loop)
+	knn only
+	Spliter: cv 5
+	K search: cv 1
+	scale: 07, 09, 97
+	news comp vs rec
+	news_2 comp vs sci
+
+=====
+sl_test _ REMOVED
+=====
+
+sl_mincut_5_1, sl_randomize_5_1, sl_tree_5_1, loop_1, loop_1_new (*2 loop), loop_1_fix (fix vertex.index)
+	scale: 97
+	Abalone, digit: cv 5
+	news, reuters: cv 1 - verify first
+	news comp vs rec
+	news_2 comp vs sci

@@ -1,0 +1,37 @@
+\begin{table}[t!]
+	\centering
+	\captionsetup{justification=centering}
+	\caption{Supervised evaluation, Abalone data.}
+	\makebox[\textwidth][c]{
+		\begin{tabular}{ c|ccc|ccc|ccc }
+			\multirow{2}{*}{Label} & Precision & Recall & F1 & Precision & Recall & F1 & Precision & Recall & F1\\
+			\cline{2-10}
+			& \multicolumn{3}{c}{\textbf{Logistic Regression}} & \multicolumn{3}{c}{\textbf{SVM}} & \multicolumn{3}{c}{\textbf{Graphical model}} \\
+			\hline
+			
+			\multicolumn{1}{c}{} & \multicolumn{9}{c}{Split-70} \\
+			\hline
+			$-1$ & 0.72 & 0.73 & 0.72 & 0.69 & 0.78 & 0.73 & 0.69 & 0.79 & 0.73 \\
+			$+1$ & 0.75 & 0.75 & 0.75 & 0.78 & 0.68 & 0.72 & 0.78 & 0.67 & 0.72 \\
+			\cline{1-10}
+			avg. & 0.74 & 0.74 & 0.74 & 0.73 & 0.73 & 0.73 & 0.74 & 0.73 & 0.73 \\
+			\hline
+			
+			\multicolumn{1}{c}{} & \multicolumn{9}{c}{Split-90} \\
+			\hline
+			$-1$ & 0.71 & 0.62 & 0.66 & 0.69 & 0.74 & 0.71 & 0.71 & 0.70 & 0.70 \\
+			$+1$ & 0.69 & 0.77 & 0.73 & 0.75 & 0.70 & 0.72 & 0.73 & 0.74 & 0.74 \\
+			\cline{1-10}
+			avg. & 0.70 & 0.69 & 0.69 & 0.72 & 0.72 & 0.72 & 0.72 & 0.72 & 0.72 \\
+			\hline
+			
+			\multicolumn{1}{c}{} & \multicolumn{9}{c}{Split-97} \\
+			\hline
+			$-1$ & 0.70 & 0.65 & 0.67 & 0.66 & 0.79 & 0.72 & 0.69 & 0.73 & 0.71 \\
+			$+1$ & 0.71 & 0.74 & 0.72 & 0.78 & 0.63 & 0.69 & 0.74 & 0.71 & 0.72 \\
+			\cline{1-10}
+			avg. & 0.70 & 0.70 & 0.69 & 0.72 & 0.71 & 0.70 & 0.72 & 0.72 & 0.72 \\
+			\hline
+	\end{tabular}}
+	\label{table4: exp sl abalone}
+\end{table}

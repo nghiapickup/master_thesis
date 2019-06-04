@@ -1,0 +1,62 @@
+\section{Semi-Supervised Learning}
+In the field of machine learning, a learning model can be described by the data. With different input data, we have different learning schedules. The data  $\mathcal{X}$ basically is in the form of feature vectors. A problem usually starts with a given set of observed data. Unsupervised models take this input data and commonly specify the clusters, reduce the dimensionality of feature vector or generally look for the structure of $\mathcal{X}$. Then the observation comes more with the foresee output $\mathcal{Y}$ called labels for each instance of $\mathcal{X}$. The supervised models join in and want to learn the mapping from $\mathcal{X}$ to $\mathcal{Y}$. When $\mathcal{Y}$ is a discrete set, we have the traditional classification problem. 
+
+The semi-supervised term is widely used in the learning models that infer from both labeled and unlabeled data, when there is much of unlabeled and a few labeled data. The model expects to promote better performance than the methods that only use the labeled ones. In this thesis, we consider the semi-supervised inference model with the classification problem. For simplification purposes, we only examine the problem of binary classification, in which the label only receives positive or negative value. 
+
+It is natural that we have some learning processes that follow the condition of semi-supervised learning, which falls in between the regimes of unsupervised and supervised models. Let's have some examples on this situation
+\begin{itemize}  
+	\item The auto collecting news system has a list of categories and needs to classify hundreds of updated news everyday. There is a core set of news that has been categorized before. The traditional classifier has a constant ability in performing this daily task and if we hire someone to update the core, it must be taking much of time to significantly improve the performance of the model.
+	
+ 	\item The marketing analysis agent based on the community response on some topics on social network sites like Facebook, Twitter, etc., is flooded in the enormous range of user comments, shares or reactions. A few of them have tag names or come from the same groups that we can treat as labels. For the large remaining part, they are unlabeled data.
+\end{itemize}
+Furthermore, human beings besides directly gaining knowledge on a new concept from the verified sources also be absorbed from a large unintended information around them. If we receive a new definition of ``Japanese bobtail cat", then it might be reminiscent of other cat breeds if we have met many cats before.
+
+There are two different learning settings in semi-supervised including \textit{inductive} and \textit{transductive} learnings. The inductive learning finds the answer for the whole domain of input data and the transductive learning takes into consideration the input data only. In other words, inductive setup aims to predict the future data which is unknown now through the input data and transductive setup only wants to know the label of the given unlabeled input data.
+
+\section{Learning from Unlabeled Data}
+
+In the statistical classification view, we are looking for the estimation of probability of $\mathcal{Y}$ if we have known $\mathcal{X}$, $P(\mathcal{Y} | \mathcal{X})$. The supervised classification can be divided into generative and discriminative classifiers \parencite{NIPS2001_2020}. The generative models implicitly estimate this probability through the joint probability of $P(\mathcal{X}, \mathcal{Y})$ using Bayesian inference. In contrast, the discriminative models directly estimate the $P(\mathcal{Y} | \mathcal{X})$. It has been argued that, in purely classification task, the discriminative models outperform generative since it only focuses on the assignment at hand and also has the simpler solution without any assumption on $\mathcal{X}$ \parencite{Vapnik1998a}. 
+
+In the same aspect, from \parencite{Olivier2006}, there are two groups of approaches in semi-supervised learning including generative and diagnostic models. Semi-supervised learning seems like a greedy strategy that grasps all the data in hand and pushes to the learning process. Unlike supervised models, what makes us believe that the unlabeled data are useful and satisfied our expectations? This should be laid on the basic assumption of semi-supervised that the relationship between what we have known on the distribution of unlabeled data is corresponding with the target labels presented in labeled ones. In other words, the information that unlabeled data bring to is the knowledge of distribution of $P(\mathcal{X})$ and that is the improved factor for our models since what we are planing is the increasing of unlabeled data. In our intuition, does not it mean that the generative approach now plays the explicit role in modeling $P(\mathcal{X})$? Furthermore, the obvious advantage of generative models is the estimation of the structure of our data. From the application perspective, when a large amount of unlabeled data pour in, it also increases the prospect of lost information, this can be quickly fixed by our generative models. Even if we want to reorganize our target definition by merging or splitting the labels, it does not require us to retrain our system.
+
+We do not have the intention to compare between the generative and diagnostic learning schemes of semi-supervised learning. In practical machine learning, the models are a set of toolbox for our problem, in different situations, we should choose the suitable tools. To know which are the good fits, besides understanding our data, it is to have a large box of tools and get to know how they work. With our intuition, we want to examine the idea of a generative approach---the assumption of the situation, and provide through rough investigations on the learning models to match up with the data assumption. By this meaning, given a specific assumption about the data distribution with generative idea, the contribution of this thesis is entirely providing the modified applicable models that adapt to this assumption.
+
+The next section will give more details on the generative approach and the learning models with our modifications.
+
+\section{The Generative Framework}
+Let $x \in \mathcal{X}$ and $y \in \mathcal{Y}$ be our random variables for an observed data and its corresponding label. The domains of $\mathcal{X}$ and $\mathcal{Y}$ are restricted by the learning setup. With inductive setting, it means the domain is the entire spectrum of data in the same way of observation in future. On the other hand, the transductive setting constrains only the data we have in the current data set.
+
+Basically, we want to find the best match of $\mathcal{X}$ to $\mathcal{Y}$. It means to classify $x$ with the estimation $\hat{y}$ that maximizing $P(y | x)$. We can denote our solutions such as
+\begin{align}
+	\hat{y}=\argmax_y{P(y | x)}
+\end{align}
+In generative schemes, this can be determined through Bayes theorem
+\begin{align}
+	\label{equal1: bayes theorem}
+	P(y | x)=\frac{P(x, y)}{P(x)} = \frac{P(x, y)}{\sum_{y}{P(x | y)P(y)}}
+\end{align}
+The denominator of (\ref{equal1: bayes theorem}) is the summation over all labels and does not affect our maximization of $P(y | x)$, so that
+\begin{align}
+	P(y | x) \propto P(x, y)
+\end{align}
+
+Consequently, our problem turns to estimate the joint probability of $P(x, y)$. Moreover, we only take into account the binary classification problem. Thus the value of $y$ belongs to positive or negative value as is in $\{-1, +1\}$. Hence we can directly present our marginal distribution as the sum of two components
+\begin{align}
+	\label{equal1: mixture of labels}
+	P(x) = P(x| y=-1)P(y=-1) + P(x| y=+1)P(y=+1)
+\end{align} 
+With this structure of $P(x)$, we can easily generate or look for the missing features of an input data.
+
+The first model that we employ here is the traditional \textit{mixture model} which goes straight with this probabilistic formula to extract the joint probability into the class prior and conditional probabilities. Then comes with an observe data set, the joint log-likelihood is incorporated with EM algorithm \parencite{10.2307/2984875} to estimate the parameters of the model. We continue further with the \textit{many-to-one assumption}. It states that the class conditional probability is a compound of different components and we continue to infer the model through them. In practice, we consider the application on text data and deploy the Naive Bayes multinomial distribution for the class conditional $P(x|y)$ and the Dirichlet distribution for the prior P(y) \parencite{Nigam:2000:TCL:347709.347724}. The issue that we tackle here is how to construct the sub-components. It seems like a trivial problem, but in practice, we will show that it has a specific impact on our model.
+
+Following the recent interest in leverage the graph structure in modeling data, we continue with the graph-based approaches. At first, we map our data into a graph and find a way to reasoning the unlabeled label through it. Then we transform our data distribution assumption into a target function that we will try to optimize. The conventional solution utilizes the minimum cut algorithm on this graph \parencite{Blum:2001:LLU:645530.757779} that to be shown to have the issue when the boundary between our data distributions are overlapped. To overcome this problem, we employ a graphical model and modify the conventional one by introduce the \textit{influence index} to adapt with our data distribution assumption. Furthermore, we also extend the basic graphical model to work on an arbitrary graph by derivering the approximate \textit{loopy belief propagation algorithm}.
+
+\section{The Structure of Thesis}
+Accordingly, the thesis is structured as follows:
+\begin{description}
+	\item[Chapter 2] begins with the traditional solution using mixture model and the many-to-one assumption. Then we will discuss a different method to initialize the model and later to show it has the influence in the model performance through the experiments.
+	
+	\item[Chapter 3] presents the graph-based methods to our problem with the conventional mincut approach. After that, we derive a graphical model and show how it can be a promising candidate for the replacement of mincut approach using our influence index with the extension of loopy belief propagation inference.
+	
+	\item[Chapter 4] finalizes the thesis with the discussion on the performance and violation of model assumption and to some prospective works in the future.
+\end{description}

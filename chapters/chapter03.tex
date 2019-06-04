@@ -1,0 +1,1006 @@
+We construct a graph $\mathcal{G}$ from the set of instances $\mathcal{X}$, where each data instance is a vertex and the edges represent the relationship between vertices. A model builds on this graph, combines with the information of labeled vertices to estimate the label for unlabeled vertices. In semi-supervised learning, the inferences that utilize the graph structure like this are called graph-based methods.
+
+As an application of graph-based methods, in this chapter, we consider our data assumption in the form of an objective function on $\mathcal{G}$. Then the inference process aims to recognize the boundary between groups of different label vertices.
+
+%The conventional approach solves this function and assigns the label for unlabeled vertices by finding a minimum cut on the graph. Nevertheless, the minimum cut frequently gives an unbalanced assignment when there is more than one solution. The thesis employs the idea of deriving a graphical model on this graph to bypass this problem. Furthermore, the affordable inference on graphical model only works with tree-like graph. Then an approximate algorithm is utilized to deal with the case when our graph does not have the tree form.
+
+%%%%%
+\section{Graph Construction}
+\label{section3: Graph Construction}
+
+Basically most graph-based methods are transductive learning. A common graph-based setup consists of two basic steps. The first is graph construction where the data is mapped to a graph, $\mathcal{X} \rightarrow \mathcal{G}$. Then in graph inference, we estimate labels for unlabeled data, $\{ \mathcal{G}, \mathcal{Y}_L \} \rightarrow \mathcal{Y}_U$.
+
+In this chapter, we discuss the first step of graph construction. Denote that $n$ is the total number of instances, $n \triangleq l + u$. We initialize a graph $\mathcal{G} = (V, E, W)$, where $V=\{1,  ..., n\}$ is the set of vertices; $E \subseteq V \times V$ is the set of edges and $W$ is a $n \times n$ weight matrix on $E$. First, we need to establish and clarify the basic conditions on $\mathcal{G}$
+\begin{description}
+	\item[$\mathcal{G}$ is a simple weighted graph:] $\mathcal{G}$ does not contain self-loop and multiple edges; each edge is undirected and assigned with a weight value.
+	
+	\item[$V$ is constructed from data instances: ] $V$ is constructed by an one-to-one correspondence with data instances and its label, $\{ (\mathcal{X}, \mathcal{Y}) \} \rightarrow V$. This means each vertex contains information of an instance and its corresponding label. In practice, $\mathcal{Y}_U$ is initialized as non-clarified labels $\mathcal{Y}_U = \{ 0 \}^u$.
+	
+	\item[$W$ is positive and symmetric: ] $W \in \mathbb{R}^{n\times n}, W > 0$ and $W_{i,j} = W_{j,i}$. If $W_{i,j} = 0$ that means there is no edge between $i$ and $j$. In this thesis, we consider the weight on an edge between two vertices as the similarity between them. In other words, the larger the weight is, the more similar the two vertices.
+\end{description}
+
+Because the set of vertices $V$ is fixed, the remaining task involves estimating $E$ and $W$. Actually we only take into account the estimation of $W$, because it entirely defines the setup of $E$.
+
+Typically the graph construction process contains two smaller steps: graph sparsification and graph re-weighting. Denote a similarity measure $S: V\times V \rightarrow \mathbb{R}^{n\times n}$ is a function that returns the similarity between two vertices. From the beginning, we initialize $\mathcal{G}$ as a fully connected graph $W_{i,j} = S(x^{(i)}, x^{(j)})$. In graph sparsification, we intend to sparsify $W$ through a binary mass matrix $P \in \{0, 1\}^{n\times n}$, where $P_{i,j} = 1$ means there is an edge between $i$ and $j$ and $0$ otherwise, start with $P$ of all zeros. There are many sparsification algorithms, though we only discuss the primary two that will be set in our practice
+\begin{description}
+	\item[K-nearest neighbors (kNN):] The typical kNN sparsification searches for the $k$ most similar vertices of each vertex. We set $P_{i,j} = 1$ if $j$ is one of the most similar neighbors of $i$. Also, if $i$ is a selected neighbor of $j$, then the reverse state does not hold. Thus to meet the symmetry condition of $W$, after searching, we have to re-symmetrize $P = max(P, P^T)$. This may lead to the misconception of the result kNN graph when after all we have $\sum_{j}{P_{i,j}} \geq k$, which means the graph would have more edges than expected.
+	
+	 \item[Maximum spanning tree (MST):] In this construction, we look for a spanning tree -- a tree containing all the vertices in $\mathcal{G}$, that has the highest sum of weights. We may further expand this structure by executing the MST on each component of the kNN graph. The benefit of this construction comes from its spanning tree structure, where we always receive the graph with a fixed number of $(n-1)$ edges. But this might be a trade-off if the graph is sparse, it could cause the lost information of vertices connection.
+\end{description}
+
+Continuing with the graph re-weighting, from the solution matrix $P$, we continue to re-estimate the weight of the selected edges to produce the final matrix $W$. The motivation of this task is to focus on some target characteristics that we aim at inference step and try to omit the misbehavior of $P$ from sparsification step. There are also some possible approaches to this task \parencite{Jebara:2009:GCB:1553374.1553432, Subramanya:2014:GSL:2765801}. For simplification purposes, we utilize the simplest schedule using the element-wise product to set $W = W \cdot P$. The graph construction process is summarized in algorithm \ref{alg4: graph construction}. It takes the instances set $\mathcal{X}$, label of labeled instances $\mathcal{Y}_L$ and similarity measure $S$ as input and outputs the graph as a pair of vertices set and weight matrix $(V, W)$.
+\begin{algorithm}[H]
+	\caption{Graph construction process}
+	\begin{algorithmic}[1]
+		\Function{Graph\_Construction}{$\mathcal{X}, \mathcal{Y}_L, S$}
+		
+		\State $\mathcal{Y}_U \gets \{0\}^u$
+		\COMMENT{Initialize label for unlabeled instances}
+		\State $\mathcal{Y} \gets \mathcal{Y}_L \cup \mathcal{Y}_U$
+		\COMMENT{Merge the complete label sets}
+		\State $V \gets \{(\mathcal{X}, \mathcal{Y})\}$
+		\COMMENT{Set $V$ as set of (instance, label)}
+		
+		\State $W \gets S(V \times V)$
+		\COMMENT{Initialize $W$ by similarity measure $S$}
+		\State $P = Sparsify(W)$
+		\COMMENT{Sparsify $W$}
+		\State $W \gets W \cdot P$
+		\COMMENT{Re-weigh $W$}
+		\RETURN $(V, W)$
+		
+		\EndFunction
+	\end{algorithmic}
+	\label{alg4: graph construction}
+\end{algorithm}
+
+So far we have been constructing the graph. In the next section we will discuss how to inferring the labels for unlabeled vertices.
+
+%%%%%
+\section{Minimum Cut Inference}
+\label{section3: mincut approach}
+
+Given our graph after construction $\mathcal{G}$. We presume that the vertices set $V$ is the union of $V_L$ and $V_U$ respectively are the subsets of labeled and unlabeled vertices,  $V = V_L \cup V_U$. Moreover, we assume $U_L = U_{L^+} \cup U_{L^-}$, where $U_{L^+}$ is the positive vertices set and $U_{L^-}$ is the negative vertices set of labeled vertices. We construct a simple target function
+\begin{align}
+\label{equal4: target function}
+\argmin_{f} \quad \frac{1}{2}\sum_{(i,j) \in E}{W_{i,j}|f(i) - f(j)|}
+\end{align}
+where $f(i) \in \{-1, +1\}$ represents labels for $i \in V$. With $i \in V_L$, $f(i) = -1$ if $i \in U_{L^-}$ and otherwise, $f(i) = +1$ if $i \in U_{L^+}$.
+
+Now let's consider the intuition viewing of  (\ref{equal4: target function}). In \parencite{Blum:2001:LLU:645530.757779}, we have an interesting expression of our implied generative framework in there. We assume that the underlying distribution is a fixed number of combined components---groups of vertices---and each has a unique label. Components are separated by a minimum dissimilarity value. An instance is generated by randomly picking a vertex in one of these components then giving it the label of component which it belongs to. 
+
+The hypothesis here is that with proper graph construction, there is a sparse connection between two components and more densely connected edges inside oneself. Then with a large enough unlabeled data, the component will be more dense and the connection between them will be the loosest one. So they become the boundary to separate the components. Thus, with only a few labeled vertices on each component, we can label all of them. Figure \ref{fig4: combination of components assumption} gives an illustration for these views with four regions of positive and negative labels.
+\begin{figure}[!ht]
+	\centering
+	\begin{subfigure}[b]{0.4\textwidth}
+		\centering
+		\begin{tikzpicture}[
+		scale=.7, auto,swap,
+		declare function={a1(\x)=(1 - \x^2)^0.5 - 2;},
+		declare function={a2(\x)= -(1 - \x^2)^0.5 - 2;},
+		declare function={b1(\x)=(1 - \x^2)^0.5 + 2;},
+		declare function={b2(\x)= -(1 - \x^2)^0.5 + 2;},
+		declare function={c1(\x)= (1 - (\x + 2)^2)^0.5;},
+		declare function={c2(\x)= -(1 - (\x + 2)^2)^0.5;},
+		declare function={d1(\x)= (1 - ((\x - 3)^2)/3)^0.5;},
+		declare function={d2(\x)= -(1 - ((\x - 3)^2)/3)^0.5;}
+		]
+		\pgfmathsetseed{1355}
+		\begin{axis}[
+		% axis line style={draw=none},
+		xtick=\empty, ytick=\empty
+		]
+		\addplot [positive data, samples=5]
+		{0.5*(a1(x)+a2(x)) + 0.5*rand*(a1(x)-a2(x))};
+		\addplot [positive data, samples=5]
+		{0.5*(d1(x)+d2(x)) + 0.5*rand*(d1(x)-d2(x))};
+		\addplot [unlabeled data, samples=60]
+		{0.5*(a1(x)+a2(x)) + 0.5*rand*(a1(x)-a2(x))};
+		\addplot [unlabeled data, samples=60]
+		{0.5*(d1(x)+d2(x)) + 0.5*rand*(d1(x)-d2(x))};
+		
+		\addplot [negative data, samples=5]
+		{0.5*(b1(x)+b2(x)) + 0.5*rand*(b1(x)-b2(x))};
+		\addplot [negative data, samples=5]
+		{0.5*(c1(x)+c2(x)) + 0.5*rand*(c1(x)-c2(x))};
+		\addplot [unlabeled data, samples=60]
+		{0.5*(b1(x)+b2(x)) + 0.5*rand*(b1(x)-b2(x))};
+		\addplot [unlabeled data, samples=60]
+		{0.5*(c1(x)+c2(x)) + 0.5*rand*(c1(x)-c2(x))};
+		\end{axis}
+		\end{tikzpicture}
+		\caption{}
+		\label{fig4.a: combination of components assumption}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\centering
+		\begin{tikzpicture}[
+		scale=.7, auto,swap,
+		declare function={a1(\x)=(1 - \x^2)^0.5 - 2;},
+		declare function={a2(\x)= -(1 - \x^2)^0.5 - 2;},
+		declare function={b1(\x)=(1 - \x^2)^0.5 + 2;},
+		declare function={b2(\x)= -(1 - \x^2)^0.5 + 2;},
+		declare function={c1(\x)= (1 - (\x + 2)^2)^0.5;},
+		declare function={c2(\x)= -(1 - (\x + 2)^2)^0.5;},
+		declare function={d1(\x)= (1 - ((\x - 3)^2)/3)^0.5;},
+		declare function={d2(\x)= -(1 - ((\x - 3)^2)/3)^0.5;}
+		]
+		\pgfmathsetseed{1355}
+		\begin{axis}[
+%		 axis line style={draw=none},
+		xtick=\empty, ytick=\empty
+		]
+		\addplot [positive data, samples=5]
+		{0.5*(a1(x)+a2(x)) + 0.5*rand*(a1(x)-a2(x))};
+		\addplot [positive data, samples=5]
+		{0.5*(d1(x)+d2(x)) + 0.5*rand*(d1(x)-d2(x))};
+		\addplot [positive data, samples=60, style=semithick]
+		{0.5*(a1(x)+a2(x)) + 0.5*rand*(a1(x)-a2(x))};
+		\addplot [positive data, samples=60, style=semithick]
+		{0.5*(d1(x)+d2(x)) + 0.5*rand*(d1(x)-d2(x))};
+		
+		\addplot [negative data, samples=5]
+		{0.5*(b1(x)+b2(x)) + 0.5*rand*(b1(x)-b2(x))};
+		\addplot [negative data, samples=5]
+		{0.5*(c1(x)+c2(x)) + 0.5*rand*(c1(x)-c2(x))};
+		\addplot [negative data, samples=60, style=semithick]
+		{0.5*(b1(x)+b2(x)) + 0.5*rand*(b1(x)-b2(x))};
+		\addplot [negative data, samples=60, style=semithick]
+		{0.5*(c1(x)+c2(x)) + 0.5*rand*(c1(x)-c2(x))};
+		
+		% bound
+    	\addplot[mark=none] coordinates { (-3,-3) (4,3) } node [midway, sloped, above] {boundary};
+
+		\end{axis}
+		\end{tikzpicture}
+		\caption{}
+		\label{fig4.b: combination of components assumption}
+	\end{subfigure}
+	\hfill
+	\caption[Illustration of the combination of components assumption.]{Illustration of the combination of components assumption. There are two positive regions and two negative regions. When there is enough unlabeled data, each component will form as a dense graph---figure (a). Thus, with only one labeled vertex on each component, we can decide the boundary and label all unlabeled vertices---figure (b).}
+	\label{fig4: combination of components assumption}
+\end{figure}
+
+We are now looking for the inference which can be adapted to the optimization condition (\ref{equal4: target function}) above. Literally, the solution is a configuration of $f(i), i \in V_U$ that guarantees the minimization. With a small set of unlabeled data, a brute-force approach that finds all the $2^u$ configurations of unlabeled vertices seems like a possible solution. But the basic condition of semi-supervised learning is a large scale of $u$. A common solution for this inference is using a minimum cut on $\mathcal{G}$, the mincut approach \parencite{Blum:2001:LLU:645530.757779}. It finds a minimum cut on which it separates all positive and negative vertices. Recall a cut $C= \{C_1, C_2\}$ on $\mathcal{G}$ is a segmentation of $V$ such that $C_1 \cap C_2 = \emptyset, C_1 \cup C_2 = V$. The size of cut $C$ is the total weight of edges between $C_1$ and $C_2$. More precisely, denote $W_C$ is the size of the cut, we have $W_C = \sum_{i \in C_1, j \in C_2} W_{i,j}$. Given a pair of source and sink vertices $(s, t)$, the minimum cut algorithm finds a cut with smallest weight such that $s \in C_1$ and $t \in C_2$. The solution for finding minimum cut is a well-known algorithm in graph theory and can be archived in polynomial running time. The detailed descriptions and tutorials of this algorithm can be found in \parencite{cormen2009introduction, West2001}.
+
+Define that $MinCut(\mathcal{G}, s, t)$ is a function which is searching for a minimum cut on $\mathcal{G}$ with source vertex $t$ and sink vertex $s$. The output returns a cut $C$ with $s \in C_1$ and $t \in C_2$. The mincut approach starts by adding two new pseudo vertices $v_+$ and $v_-$ to $V$, then connects $v_+$ with all positive vertices and $v_-$ with all negative vertices. These pseudo vertices are treated as the stakes that keep all positive and negative vertices in separate parts. When we have a minimum cut on $\mathcal{G}$ with $v_+$ and $v_-$ are source and sink, MinCut$(\mathcal{G}, v_+, v_-)$, we can label all unlabeled vertices using its correspondence with $v_+$ or $v_-$. All vertices in the part containing $v_+$ will have the positive label and all vertices in the part of $v_-$ will have the negative label. Figure \ref{fig4: mincut example} illustrates the process of mincut approach and we summarize the process in algorithm \ref{alg4: mincut}. It receives the graph $\mathcal{G}$ as input and returns the vertices set $V$ after labeling all unlabeled vertices.
+
+It is obvious that the complexity of this approach mainly comes from the function MinCut$(\mathcal{G}, s, t)$. Constantly, the problem of finding a minimum s-t cut in graph is similar to looking for a maximum flow on $\mathcal{G}$. For quick implementation, we may take the well known Edmonds–Karp algorithm \parencite{Edmonds:1972:TIA:321694.321699} which costs us $\mathcal{O}(n|E|^2)$ to find the solution. One of the more advanced methods, the push-relabel algorithm \parencite{KING1994447}, is commonly supported in difference graph frameworks having the complexity of $\mathcal{O}(n|E|\log{\frac{n^2}{|E|}})$. There are also other methods that would save more time, but they are far more complicated to be considered in our meaning time.
+
+\begin{figure}[!ht]
+	\centering
+	\captionsetup[subfigure]{justification=centering}
+	\begin{subfigure}[b]{0.4\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.3, auto,swap]
+		% First we draw the vertices
+		\foreach \pos/\label/\name in {
+			{(0,0)/a/+}, {(1,0)/b/}, {(2,0)/c/},
+			{(0,1)/e/+}, {(1,1)/f/}, {(2,1)/g/}}
+		\node[positive vertex] (\label) at \pos{$\name$};
+		
+		\foreach \pos/\label/\name in {{(3,0)/d/-}, {(3,1)/h/-}}
+		\node[negative vertex] (\label) at \pos{$\name$};
+		
+		% Connect vertices with edges and draw weights
+		\foreach \source/ \dest in {
+			b/e,b/g,d/g}
+		\path[thickedge] (\source) -- (\dest);
+		\foreach \source/ \dest in {
+			a/b,a/e,b/c,c/d,d/h,e/f,f/g,g/h}
+		\path[edge] (\source) -- (\dest);
+		\end{tikzpicture}
+		\caption*{Input graph $G$, weight is represented as edge thickness.}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.3, auto,swap]
+		% First we draw the vertices
+		\foreach \pos/\label/\name in {
+			{(0,0)/a/+}, {(1,0)/b/}, {(2,0)/c/},
+			{(0,1)/e/+}, {(1,1)/f/}, {(2,1)/g/}, {(-1,0.5)/v+/v_+}}
+		\node[positive vertex] (\label) at \pos{$\name$};
+		
+		\foreach \pos/\label/\name in {{(3,0)/d/-}, {(3,1)/h/-}, {(4,0.5)/v-/v_-}}
+		\node[negative vertex] (\label) at \pos{$\name$};
+		
+		% Connect vertices with edges and draw weights
+		\foreach \source/ \dest in {
+			b/e,b/g,d/g}
+		\path[thickedge] (\source) -- (\dest);
+		\foreach \source/ \dest in {
+			a/b,a/e,b/c,c/d,d/h,e/f,f/g,g/h}
+		\path[edge] (\source) -- (\dest);
+		
+		% inf weight
+		\path[draw, line width=3pt] (v+) -- node[sloped, above]{\footnotesize $\infty$} (e);
+		\path[draw, line width=3pt] (v-) -- node[sloped, above]{\footnotesize $\infty$} (h);
+		
+		\path[draw, line width=3pt] (v+) -- node[sloped, below]{\footnotesize $\infty$} (a);
+		\path[draw, line width=3pt] (v-) -- node[sloped, below]{\footnotesize $\infty$} (d);
+		\end{tikzpicture}
+		\caption*{Step 1, add pseudo vertices $v_+, v_-$ and corresponding edges.}
+	\end{subfigure}
+
+	\vspace*{5pt}
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.3, auto,swap]
+		% First we draw the vertices
+		\foreach \pos/\label/\name in {
+			{(0,0)/a/+}, {(1,0)/b/}, {(2,0)/c/},
+			{(0,1)/e/+}, {(1,1)/f/}, {(2,1)/g/}, {(-1,0.5)/v+/v_+}}
+		\node[positive vertex] (\label) at \pos{$\name$};
+		
+		\foreach \pos/\label/\name in {{(3,0)/d/-}, {(3,1)/h/-}, {(4,0.5)/v-/v_-}}
+		\node[negative vertex] (\label) at \pos{$\name$};
+		
+		% Connect vertices with edges and draw weights
+		\foreach \source/ \dest in {
+			b/e,b/g,d/g}
+		\path[thickedge] (\source) -- (\dest);
+		\foreach \source/ \dest in {
+			a/b,a/e,b/c,c/d,d/h,e/f,f/g,g/h}
+		\path[edge] (\source) -- (\dest);
+		
+		% inf weight
+		\path[draw, line width=3pt] (v+) -- node[sloped, above]{\footnotesize $\infty$} (e);
+		\path[draw, line width=3pt] (v-) -- node[sloped, above]{\footnotesize $\infty$} (h);
+		
+		\path[draw, line width=3pt] (v+) -- node[sloped, below]{\footnotesize $\infty$} (a);
+		\path[draw, line width=3pt] (v-) -- node[sloped, below]{\footnotesize $\infty$} (d);
+		
+		\path[dashedge] (1.5, 1.5) -- (1.5, -0.5);
+		\end{tikzpicture}
+		\caption*{Step 2, find a minimum cut in G with source $v_+$ and sink $v_-$.}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.4\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.3, auto,swap]
+		% First we draw the vertices
+		% First we draw the vertices
+		\foreach \pos/\label/\name in {
+			{(0,0)/a/+}, {(0,1)/e/+}, {(1,0)/b/+}, {(1,1)/f/+}}
+		\node[positive vertex] (\label) at \pos{$\name$};
+		
+		\foreach \pos/\label/\name in {
+			{(3,0)/d/-}, {(3,1)/h/-}, {(2,1)/g/-}, {(2,0)/c/-}}
+		\node[negative vertex] (\label) at \pos{$\name$};
+		
+		% Connect vertices with edges and draw weights
+		\foreach \source/ \dest in {
+			b/e,b/g,d/g}
+		\path[thickedge] (\source) -- (\dest);
+		\foreach \source/ \dest in {
+			a/b,a/e,b/c,c/d,d/h,e/f,f/g,g/h}
+		\path[edge] (\source) -- (\dest);
+		
+		\path[dashedge] (1.5, 1.5) -- (1.5, -0.5);
+		\end{tikzpicture}
+		\caption*{Step 3, use this cut to label unlabeled vertices.}
+	\end{subfigure}
+	\caption{Example of mincut approach.}
+	\label{fig4: mincut example}
+\end{figure}
+
+\begin{algorithm}[H]
+	\caption{Semi-supervised mincut approach}
+	\begin{algorithmic}[1]
+		\Function{Mincut\_SSL}{$\mathcal{G}, s, t$}
+		\State \texttt{\# Step 1}
+		\State{$V \gets V \cup \{v_+, v_-\}$}
+		\COMMENT{Add in $\mathcal{G}$ two new vertices $v_+$ and $v_-$}
+		\For{$i \in V_{L^+}$}
+		\COMMENT{For each positive vertices:}
+		\State{$W_{i, v_+} \gets +\infty$}
+		\COMMENT{Connect to $v_+$ with $+\infty$ weight}
+		\EndFor
+		\For{$i \in V_{L^-}$}
+		\COMMENT{For each negative vertices:}
+		\State{$W_{i, v_-} \gets +\infty$}
+		\COMMENT{Connect to $v_-$ with $+\infty$ weight}
+		\EndFor
+		
+		\State \texttt{\# Step 2}
+		\State{$C = MinCut(\mathcal{G}, v_+, v_-)$}
+		\COMMENT{Find a minimum cut on $\mathcal{G}$ }
+		
+		\State \texttt{\# Step 3}
+		\For{$i \in C_1$}
+		\COMMENT{For each vertex in the part of $v_+$:}
+		\State{$V_{L^+} \gets V_{L^+} \cup i$}
+		\COMMENT{Add it all to positive label set}
+		\EndFor
+		\For{$i \in C_2$}
+		\COMMENT{For each vertex in the part of $v_-$:}
+		\State{$V_{L^-} \gets V_{L^-} \cup i$}
+		\COMMENT{Add it all to negative label set}
+		\EndFor
+		\State{$V \gets V_{L^+} \cup V_{L^-}$}
+		\COMMENT{$V$ is now all labeled}
+		\RETURN $V$
+		
+		\EndFunction
+	\end{algorithmic}
+	\label{alg4: mincut}
+\end{algorithm}
+
+In the case of having more than one minimum cut, which means more than one configuration of $f$ that matches the condition (\ref{equal4: target function}), the mincut approach is prone to a cut that is close to the positive or negative region. Thus this label will have a smaller proportion of vertices. For instance, in figure \ref{fig4: mincut unbalance}, the selected cut is more likely to be $C_1$ or $C_2$ than others. From an overall perspective, this missing behavior may not tell much about the performance of this approach, since we do not know the exact global proportion of data set. However, many experiments had been conducted on this problem and showed that it is better to have the solution with more balance between labels \parencite{Blum:2001:LLU:645530.757779, Blum:2004:SLU:1015330.1015429, Joachims:2003:TLV:3041838.3041875, Malik2000}. Furthermore, the balanced cut solution has been proved to be an NP-hard problem \parencite{Malik2000}.
+
+\begin{figure}[ht!]
+	\centering
+	\begin{tikzpicture}[scale=1.3, auto,swap]
+	% First we draw the vertices
+	\foreach \pos/\label/\name in {
+		{(0,0)/a/+}, {(1,0)/b/}, {(2,0)/c/}, {(3,0)/d/}, {(4,0)/e/},
+		{(0,1)/g/+}, {(1,1)/h/}, {(2,1)/i/}, {(3,1)/j/}, {(4,1)/k/}}
+	\node[positive vertex] (\label) at \pos{$\name$};
+	
+	\foreach \pos/\label/\name in {{(5,0)/f/-}, {(5,1)/l/-}}
+	\node[negative vertex] (\label) at \pos{$\name$};
+	
+	\foreach \pos/\label in {{(2.5, 0)/x1}, {(2.5, 1)/x2}}
+	\node (\label) at \pos{$\dots$};
+		
+	% Connect vertices with edges and draw weights
+	\foreach \source/ \dest in {
+		a/h, h/c, j/e, e/l}
+	\path[thickedge] (\source) -- (\dest);
+	\foreach \source/ \dest in {
+		a/b, b/c, d/e, e/f, f/l, l/k, k/j, i/h, h/g, g/a}
+	\path[edge] (\source) -- (\dest);
+	
+	\path[dashedge] (.5, 1.2) -- (.5, -0.5);
+	\node[note] at (.5,1.5) {$C_1$};
+	\path[dashedge] (1.5, 1.2) -- (1.5, -0.5);
+	\path[dashedge] (3.5, 1.2) -- (3.5, -0.5);
+	\path[dashedge] (4.5, 1.2) -- (4.5, -0.5);
+	\node[note] at (4.5,1.5) {$C_2$};
+	\end{tikzpicture}
+	\caption{Example of a graph has more than one minimum cut.}
+	\label{fig4: mincut unbalance}
+\end{figure}
+
+In \parencite{Blum:2004:SLU:1015330.1015429}, we have an idea of the \textit{randomized mincut approach}. The method repeatedly disturbs the edges set $E$ by adding a small amount of noise into the weight matrix. At each iteration, it finds a new minimum cut. The cut is then verified and will be removed if it gives an unbalanced prediction on the train set. Finally, with a set of cuts, the label will be decided on the majority agreements of all cuts. However, through our experimental investigation, this method has no advantage over the original mincut approach. Following this unbalanced issue, in the next chapter, we are going to examine an alternative solution for the mincut approach.
+
+%%%%%
+\section{Graphical Model}
+
+A possible replacement for the mincut approach employs a graphical model. This idea was raised in \parencite{Blum:2001:LLU:645530.757779} and had the first fundamental experimental verification with a tree graph construction in \parencite{Blum:2004:SLU:1015330.1015429}. Graphical model is a wide range of research field which is approaching the graph structure on exploring the connected relationship of a set of random variables. This thesis does not try to cover the general technical terms and algorithms of this model. Accordingly, it only focuses on the application of this model in case of solving the target function on binary classification. Gentle introductions, tutorials and examples for graphical model can be found in \parencite{jordan2004, Koller2009, bishop2006pattern}.
+
+Currently, the conventional deployment of graphical model on (\ref{equal4: target function}) only works with a graph forming as a tree using \textit{max-sum} algorithm. The algorithm itself does not have much ability to adapt to the balancing problem. This thesis introduces the \textit{influence index} that supports the inference decision on each vertex when we have more than one applicable decision. In addition, there is no affordable learning algorithm that can work on an arbitrary graph. To complement the conventional approach, we extend this approach in the case of graph having cycles using the approximate inference algorithm \textit{loopy belief propagation}. Combine them together and we have a complete alternative solution for the mincut approach that can be assembled with general graph constructions. Algorithm \ref{alg4: graphical model combination} gives a brief sketch for this combination.
+\begin{algorithm}[H]
+	\caption{Graphical model for arbitrary graph using influence index}
+	\begin{algorithmic}[1]
+		\Function{GraphicalModel\_SSL}{$\mathcal{G}, y_L$}
+		\State{influence $\gets$ \textless Compute influence index for $i \in V_U$\textgreater}
+		\If{$\mathcal{G}$  \textbf{is} Tree}
+		\State{$ \textnormal{inference} \gets \textnormal{Max\_Sum}(\mathcal{G}, y_L, \textnormal{influence})$}
+		\Else
+		\State{$ \textnormal{inference} \gets \textnormal{Loopy\_Belief}(\mathcal{G}, y_L)$}
+		\EndIf
+		\State{$y_U \gets$ \textless Trace back label from inference\textgreater}
+		\RETURN $y_U$
+		
+		\EndFunction
+	\end{algorithmic}
+	\label{alg4: graphical model combination}
+\end{algorithm}
+
+\subsection{Inference on Tree}
+To keep this chapter consistent and self-contained, we first go through with the model setup and the fundamental idea of the max-sum algorithm. Suppose we have a set of random variables $X = \{X_i : i \in V, X_i = f(i) \}$. Define a set of factors
+\begin{align}
+	\Phi = \{ \phi_{i,j} : (i,j) \in E, \phi_{i,j} = \exp(-W_{i,j}(X_i - X_j)^2) \}
+\end{align}
+We assume that the implied distribution of $X_i$ only depends on $\Phi$; $\phi(u,v)$ is independent at each other. We can define our model as a joint distribution
+\begin{align}
+	\label{equal4: graphical model}
+	& P_\Phi(X) = \frac{1}{Z} \prod_{(i,j) \in E}{\phi_{i,j}} \\
+	\intertext{where the normailizing constant (partition function)}
+	&Z = \sum_{X} \prod_{(i,j) \in E}{\phi_{i,j}}\nonumber
+\end{align}
+
+Consider the inference to maximize the joint distribution
+\begin{align}
+	\begin{split}
+	\argmax_X{P_\Phi}(X) & = \argmax_X{\frac{1}{Z} \prod_{(i,j) \in E}{\phi_{i,j}}} \\
+	& =  \argmax_X{\prod_{(i,j) \in E}{\phi_{i,j}}}
+	\end{split}
+	\label{equal4: MAP graphical model}
+\end{align}
+Take the logarithm, then we have
+\begin{align}
+	\begin{split}
+	(\ref{equal4: MAP graphical model}) &= \argmax_X{\ln(\prod_{(i,j) \in E}{\phi_{i,j}})} \\
+	&= \argmax_X{\ln(\prod_{(i,j) \in E}{ \exp(-W_{i,j}(X_i - X_j)^2) })} \\
+	&= \argmax_X{\sum_{(u,v) \in E}{ -W_{i,j}(X_i - X_j)^2 }}
+	\end{split}
+	\label{equal4: log MAP}
+\end{align}
+Combine the condition $W_{u,v}(X_u - X_v)^2 \geq 0$, then from (\ref{equal4: log MAP}) we can obtain that the result of this inference is similar to our target function (\ref{equal4: target function}).
+
+Looking back at our inference (\ref{equal4: MAP graphical model}), define $X_{max}$ is an observed set of $X$ that maximizes the joint distribution, we have
+\begin{align}
+	X_{max} = \argmax_X{P_\Phi}(X)
+\end{align}
+Then from (\ref{equal4: graphical model}), the maximize probability can be represented as
+\begin{align}
+	\begin{split}
+	P_\Phi(X_{max}) &= \max_X{P_\Phi}\\
+	&= \max_{X_1, ..., X_n}{\prod_{(i,j) \in E}{\phi_{i,j}}}
+	\end{split}
+	\label{equal4: expanded maximize join distribution}
+\end{align}
+
+Let's consider a simple case when we have a tree as a chain of vertices in figure \ref{fig4.a: chain graph}, we have
+\begin{align}
+		(\ref{equal4: expanded maximize join distribution}) &\Leftrightarrow 
+		\max_{X_1, ..., X_n}{\left( \phi_{1,2} \ \phi_{2,3} \dots \phi_{m-1,m} \ \phi_{m,m+1} \dots \phi_{n-1,n} \right)}\\
+		& = \max_{X_1} \left[ \max_{X_2} \left[ \dots \left[ 
+			\max_{X_n}{ \left( \phi_{1,2} \ \phi_{2,3} \dots \phi_{m-1,m} \ \phi_{m,m+1} \dots \phi_{n-1,n} \right) }
+		\right] \dots \right] \right]
+		\label{equal4: chain tree: inference equation}
+\end{align}
+
+\begin{figure}[!ht]
+	\centering
+	\begin{subfigure}[b]{\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.5, auto,swap]
+		% First we draw the vertices
+		\foreach \pos/\label/\name in {
+			{(0,1)/a/X_1}, {(1.5,1)/b/X_2}, {(3,1)/c/X_{m-1}}}
+		\node[vertex, label={$\name$}] (\label) at \pos{};
+		
+		\node[vertex, label=right:{$X_m$}] (d) at (4.5,0.5){};
+		
+		\foreach \pos/\label/\name in {
+			{(0,0)/g/X_n}, {(1.5,0)/f/X_{n-1}}, {(3,0)/e/X_{m+1}}}
+		\node[vertex, label=below:{$\name$}] (\label) at \pos{};
+		
+		\foreach \pos in {(2.25, 0), (2.25, 1)}
+		\node at \pos{$\dots$};
+		
+		% Connect vertices with edges 
+		\foreach \source/ \dest in {
+			a/b, c/d, g/f, e/d}
+		\path[edge] (\source) -- (\dest);
+		\end{tikzpicture}
+		\caption{A simple graph forms a chain of vertices.}
+		\label{fig4.a: chain graph}
+	\end{subfigure}
+
+	\hfill
+
+	\begin{subfigure}[b]{\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.5, auto,swap]
+		% First we draw the vertices
+		\foreach \pos/\label/\name in {
+			{(0,1)/a/X_1}, {(1.5,1)/b/X_2}, {(3,1)/c/X_{m-1}}}
+		\node[vertex, label={$\name$}] (\label) at \pos{};
+		
+		\node[vertex, label=right:{$X_m$}] (d) at (4.5,0.5){};
+		
+		\foreach \pos/\label/\name in {
+			{(0,0)/g/X_n}, {(1.5,0)/f/X_{n-1}}, {(3,0)/e/X_{m+1}}}
+		\node[vertex, label=below:{$\name$}] (\label) at \pos{};
+		
+		\foreach \pos in {(2.25, 0), (2.25, 1)}
+		\node at \pos{$\dots$};
+		
+		% Connect vertices with edges 
+		\foreach \source/ \dest/ \name  in {
+			a/b/{A(X_1,X_2)}, g/f/{B(X_{n},X_{n-1})}}
+		\path[edge, ->] (\source) -- (\dest) node[midway, above]{$\scriptstyle \name$};
+		
+		% Connect vertices with edges
+		\path[edge, ->] (e) -- (d) node[midway, below, xshift=6mm]{$\scriptstyle B(X_{m+1},X_m)$};
+		\path[edge, ->] (c) -- (d) node[midway, above, xshift=6mm]{$\scriptstyle A(X_{m-1},X_m)$};
+		\end{tikzpicture}
+		\caption{Messages send from $X_1$ to $X_m$ and from $X_n$ to $X_m$}
+		\label{fig4.b: message sending as A and B}
+	\end{subfigure}
+	\caption{Inference in a chain of vertices.}
+	\label{fig4: tree as chain of vertices}
+\end{figure}
+
+We first assume that all the random variables are unobserved. Follow the maximization of all random variables in (\ref{equal4: chain tree: inference equation}) gives a brute force approach that takes all positive combination of $X$ having $2^n$ cases. Now we are looking for a better way to compute it. We may have noticed that each maximization on a random variable only affects on the factor functions which have this variable is one of its parameters and there are at most two factors that is related to a maximization. For example, the maximization on $X_m$ only affects on $\phi_{m-1, m}$ and $\phi_{m, m+1}$. Furthermore, in figure \ref{fig4.a: chain graph}, we have two special random variables that belong to only one factor, $X_1$ and $X_n$. Also, they are corresponding with two leaf vertices on this tree. Then we can rearrange (\ref{equal4: chain tree: inference equation}) to group only related factors with its maximization, so that
+\begin{align}
+	\begin{split}
+		(\ref{equal4: chain tree: inference equation}) = \max_{X_m} \biggl[
+		& \max_{X_{m-1}}{
+			\phi_{m-1, m} \left[ \dots \left[  \max_{X_2}{
+				\phi_{2,3} \left( \max_{X_1}{\phi_{1,2}} \right)
+			} \right] \dots \right]
+		} \\
+		& \max_{X_{m+1}}{
+			\phi_{m+1, m} \left[ \dots \left[  \max_{X_{n-1}}{
+				\phi_{n-1,n-2} \left( \max_{X_n}{\phi_{n,n-1}} \right)
+			} \right] \dots \right]
+		}
+		\biggr]
+	\end{split}
+	\label{equal4: chain tree: rearrange inference}
+\end{align}
+We may observe that (\ref{equal4: chain tree: rearrange inference}) contains two parts, the first part is group of maximization of $[X_1, ..., X_{m-1}]$ and the second part is of $[X_{m+1}, ..., X_{n}]$. Consider the first part, we define a function $A$ recursively
+\begin{align*}
+	& A(X_1, X_2) = \max_{X_1}{\phi_{1,2}}, \\
+	& A(X_2, X_3) = \max_{X_2}{\left( \phi_{2,3}A(X_1, X_2) \right)}, \\
+	& ..., \\
+	& A(X_{m-1}, X_m) = \max_{X_{m-1}}{\left( \phi_{m-1,m}A(X_{m-2}, X_{m-1}) \right)}
+\end{align*}
+Similarly, we define a function $B$ for the second group
+\begin{align*}
+	& B(X_n, X_{n-1}) = \max_{X_n}{\phi_{n,n-1}}, \\
+	& B(X_{n-1}, X_{n-2}) = \max_{X_{n-1}}{\left( \phi_{n-1,n-2}B(X_{n}, X_{n-1}) \right)}, \\
+	& ..., \\
+	& B(X_{m+1}, X_m) = \max_{X_{m+1}}{\left( \phi_{m+1,m}B(X_{m+2}, X_{m+1}) \right)}
+\end{align*}
+Combine them together and we have
+\begin{align}
+	(\ref{equal4: chain tree: rearrange inference}) \Leftrightarrow \max_{X_m}{\left( 
+		A(X_{m-1}, X_m) B(X_{m+1}, X_m) 
+		\right)}
+\end{align}
+Consequently, the inference through recursive functions $A$ and $B$ reduces our calculation significantly. The size of each maximization now is $2^2 = 4$ numbers---a factor that inputs 2 variables and each has value in $\{-1, 1\}$---and we only need to execute it $|E|$ times. In addition, we may consider $A$ and $B$ as messages sent on the graph, $A$ is messages sent from vertex of $X_1$ to $X_m$ and $B$ is messages sent from vertex of $X_n$ to $X_m$. The figure \ref{fig4.b: message sending as A and B} shows this view of message sending process. 
+
+Let's formalize this idea to a general tree. At first, on each edge, we need to decide a sending schedule where message will be sent starting from the leaves vertices to a root. Moreover, the sending schedule must follow the condition that before a message is sent from a vertex, it has received all the messages sent to it. We can handle this schedule using a breadth-first search starting from any vertex as root and invert the search route to get the sending schedule. Figure \ref{fig4: types of vertices on tree} summarizes the different types of vertices we need to handle in this sending process.
+
+\begin{figure}[ht!]
+	\centering
+	\begin{subfigure}[b]{.3\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.5, auto,swap]
+		% First we draw the vertices
+		\node[vertex, label={$X_i$}] (a) at (0,0){};
+		\node (b) at (1, 0){$\dots$};
+		\path[edge, ->] (a) -- (b);
+		\node[ellipse, minimum height=3cm, minimum width=1cm] at (0,0) {};
+		\end{tikzpicture}
+		\caption{A leave vertex}
+		\label{fig4.a: types of vertices on tree: leaf}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{.3\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.5, auto,swap]
+		% First we draw the vertices
+		\foreach \pos/\label in {
+			{(0,0)/a}, {(0,1)/b}}
+		\node[vertex] (\label) at \pos{};
+		\node at (0,0.56){$\vdots$};
+		
+		\node[dashed, draw, ellipse, 
+		minimum height=2.7cm, minimum width=1cm,
+		label=above:{$\scriptstyle ne(i)/j$}] at (0,0.5) {};
+		
+		\foreach \pos/\label/\name in {
+			{(1,0.5)/i/X_i}, {(2,0.5)/j/X_j}}
+		\node[vertex, label={$\name$}] (\label) at \pos{};
+				
+		\foreach \source/ \dest in {
+			a/i, b/i, i/j}
+		\path[edge, ->] (\source) -- (\dest);
+		\end{tikzpicture}
+		\caption{A typical vertex}
+		\label{fig4.b: types of vertices on tree: normal vertex}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{.3\textwidth}
+		\centering
+		\begin{tikzpicture}[scale=1.5, auto,swap]
+		% First we draw the vertices
+		\foreach \pos/\label in {
+			{(0,0)/a}, {(0,1)/b}}
+		\node[vertex] (\label) at \pos{};
+		\node at (0,0.56){$\vdots$};
+		
+		\node[dashed, draw, ellipse, 
+		minimum height=2.7cm, minimum width=1cm,
+		label=above:{$\scriptstyle ne(m)$}] at (0,0.5) {};
+		
+		\foreach \pos/\label/\name in {
+			{(1,0.5)/m/X_m}}
+		\node[vertex, label={$\name$}] (\label) at \pos{};
+		
+		\foreach \source/ \dest in {
+			a/i, b/i}
+		\path[edge, ->] (\source) -- (\dest);
+		\end{tikzpicture}
+		\caption{A root vertex}
+		\label{fig4.c: types of vertices on tree: root}
+	\end{subfigure}
+	
+	\caption{Types of vertices on a tree.}
+	\label{fig4: types of vertices on tree}
+\end{figure}
+
+Assume that the message is sent from $i$ to $j$. Then on an edge $(i,j) \in E$  which is not a leave or root vertex, we define the message
+\begin{align}
+\psi(X_i, X_j) = \max_{X_i} \left[ 
+\phi_{i,j} \prod_{k \in ne(i)/j} {\psi(X_k, X_i)}
+\right]
+\label{equal4: product message on vertex}
+\end{align}
+Where $ne(i)$ is a function returns set of all neighbor vertices of $i$. In practice, we utilize the logarithm function to leverage our calculation by converting between product and sum. This approach names the max-sum algorithm. So that
+\begin{align}
+(\ref{equal4: product message on vertex}) \Leftrightarrow \psi(X_i, X_j) = \max_{X_i} \left[ 
+\phi_{i,j} \sum_{k \in ne(i)/j} {\ln{(\psi(X_k, X_i))}}
+\right]
+\label{equal4: sum message on vertex}
+\end{align}
+In case of $i$ is a leaf, we have
+\begin{align}
+\psi(X_i, X_j) = \max_{X_i}{\left( \ln{(\phi_{i,j})} \right)}
+\label{equal4: message on leaf}
+\end{align}
+Finally, after all the messages are sent, suppose our root is $m$, then we take all the neighbor messages and get the maximum result
+\begin{align}
+	P_\Phi(X_{max}) = \max_{X_m} {\sum_{k \in ne(m)}{\psi(X_k, X_m)}}
+	\label{equal4: message on root}
+\end{align}
+
+After we have done with sending message to the root, we can trace back this root to get the corresponding values of $X_{max}$, we will discuss this process further in next section. Furthermore, in the case $X_i$ is observed -- labeled vertex, we directly assign this value to compute the message without taking the maximization.
+
+%As noted from the beginning, all the definitions in this section are set to only fit with our problem. We have omitted and simplified some of the terms and algorithms and it may have mismatched with the general definitions in references.
+
+\subsection{Influence Index and Loopy Belief Propagation}
+\label{subsection: influence and loopy belief}
+Consider the problem when we have more than one possible solution. When finding a minimum cut, we can not intervene in the process and can only determine the final cut value until we have finished the flow detecting process. In the case of max-sum algorithm, this can be detected when we trace back the result in the maximization of (\ref{equal4: sum message on vertex}) and (\ref{equal4: message on root}). 
+
+Usually, when we have equal inputs and look for the maximization index, the function will return a default index or randomly choose the result. This does not affect the final result because these all produce maximum probability. But when the number of equal occasions increases significantly, this default behavior to decide which label should a vertex belong to may cause the degenerate solution when all equal probabilities are set to only one label. Therefore, it is better to have a second criteria to decide which one should have higher priority. To bypass this problem,  we heuristically define an influence index for each vertex using the total weight by the similarity measure from graph construction $S$. The similarity takes between unlabeled vertices $V_U$ and sets of positive and negative label vertices. If there is a tide decision to trace back the process, the decision will be made on which label has a larger total weight. So that, we define
+\begin{align}
+	\textnormal{influence}_{i \in V_U} = \argmax_{X_i}{ \sum_{X_i = X_j, j \in V_L}{S(X_i, X_j)} }
+\end{align}
+Because the max-sum algorithm sends a message on each edge only one time, hence it is convenient for us to catch the trace right after a message is sent. We denote that the trace on an unlabeled vertex $i$ is the decision label to our message $\psi(X_i, X_j)$. Then we define the trace on each edge
+\begin{align}
+	\textnormal{trace}_{i \in V_U} = 
+	\begin{cases}
+	\textnormal{influence}_{i} &\quad \text{if } \psi(+1, X_j) = \psi(-1, X_j)\\
+	\argmax_{X_i}{\psi(X_i, X_j)} &\quad \text{otherwise.}
+	\end{cases}
+\end{align}
+The same implementation is applied for root $m$ to decide the label at root vertex. For $k\in ne(m)$, we have
+\begin{align}
+	\textnormal{trace}_{m} = 
+	\begin{cases}
+	\textnormal{influence}_{m} & \text{if } \sum_{k}{\psi(X_k, +1)} = \sum_{k}{\psi(X_k, -1)}\\
+	\argmax_{X_m}{\sum_{k}{\psi(X_k, X_m)}} & \text{otherwise.}
+	\end{cases}
+	\label{equal4: trace at root}
+\end{align}
+
+Algorithm \ref{alg4: max-sum} summarizes the message sending process of max-sum algorithm using influence index. Start by constructing the sending schedule by reversing the breadth-first search with default root $V_0$. Then follow the edges list in sending schedule, the algorithm defines the message on these edges and sets trace for unlabeled vertices. Finally, it returns the sent messages list.
+
+\begin{algorithm}[H]
+	\caption{Max-sum algorithm using influence index}
+	\begin{algorithmic}[1]
+		\Function{Max\_Sum}{$\mathcal{G}, y_L, \textnormal{influence}$}
+
+		\State schedule $\gets$ reverse\_BFS$(V_0)$
+		\For{$(i,j) \in$ schedule}
+		\If{$i$ \textbf{is} Leaf}
+		\State{$\psi[X_i, X_j] = \max_{X_i}{\left( \ln{(\phi_{i,j})} \right)}$}
+		\Else
+		\State{$\psi[X_i, X_j] = \max_{X_i} \left( 
+			\phi_{i,j} \sum_{k \in ne(i)/j} {\ln{(\psi[X_k, X_i])}}
+			\right)$}
+			\If{$i \in V_U$}
+			\State{Set $\textnormal{trace}[i]$}
+			\EndIf
+		\EndIf
+		\EndFor
+		
+		\RETURN $\psi$
+		
+		\EndFunction
+	\end{algorithmic}
+	\label{alg4: max-sum}
+\end{algorithm}
+
+In general, the additional influence index does not affect the complexity of our model, we can handle with its calculation in graph construction before going to the inference process. Now, consider the implemented algorithm \ref{alg4: max-sum}, the cost for building the sending schedule is $\mathcal{O}(|E|)$ when we use the adjacency list to store the edges. Then the complexity of this algorithm depends on the loop of sending messages. This loop only iterate $|E|$ times with the messages only sends one time on each edge. Each time, we only send one message, if it is sent from a leaf, the complexity is constant when finding the maximize of $2^2=4$ inputs. Moreover, because the factors are fixed, then we can re-estimate all these messages before and the complexity reduce to constant $\mathcal{O}(1)$. In the case of other vertices, we sum over the neighbors and maximize the same $4$ inputs. The summation is taken on all neighbors vertices, each is checked one time, then in total we have to check them $2|E|$ times. Finally, we have our sending process complexity is $\mathcal{O}(|E|^2)$.
+
+Now we extend our work to an arbitrary graph. In this case, we employ the loopy belief propagation algorithm and integrate with our influence index. The loopy belief propagation is an approximate algorithm which does not guarantee the convergence of joint probability. The algorithm is merely an extension of the max-sum algorithm when the messages are sent in both directions. It is possible that we have a positive solution with convergence on most of the vertices when the max-sum algorithm only handles the message locally where each message only depends on its neighbors. There are many works that have been done on this algorithm and tried to extend the range of graph types and also arbitrary graph with positive results \parencite{DBLP:journals/corr/abs-cs-0508101, pmlr-v2-huang07a, Aji98onthe, 6789575}.
+
+Let's define the message sending process. Now we have an arbitrary graph with cycles and there is no leaf or root. It is certain that some path of bridges which outside the cycles can have the exact inference as in a tree, but now we are supposed to only take into consideration messages on these cycles. For each edge $(i,j)$, we define two messages using the same formula in (\ref{equal4: sum message on vertex}) on both directions, $\psi(X_i, X_j)$ and $\psi(X_j, X_i)$. On a cycle, a message, say $\psi(X_i, X_j)$, would be re-estimated many times and this process should be triggered every time one of a neighbor of the two ends vertices $\psi(X_{ne(i)/j}, X_i)$ is updated.
+
+At first, we initialize all messages on each vertex and directions using the formula of (\ref{equal4: message on leaf}). The process of sending messages is repeatedly executed. In this measure, there are two common schedules for sending messages on a cycle \parencite{bishop2006pattern}. The first is serials schedule when we only send one message at each time. The second, which will be implemented here, is a flooding schedule. At each iteration, we send messages on all edges and in both directions. This schedule makes it easier to follow the track of our messages and utilize our influence index. We can determine when a message from a labeled vertex is sent to an unlabeled one. Since a message is being sent many times, we can not catch the trace immediately through its process. At later when the sending process is finished, the trace of label on each vertex is determined by sum over all messages sending from its neighbors, same as the calculation on root vertex of max-sum algorithm in (\ref{equal4: trace at root}) where we also deploy our influence index.
+
+Finally, there must be a state to stop the loop or a convergence condition. In our case, there is no rational evidence to check whether all or major parts of the vertices are converged or they will not. Hence the explicit condition is the loop count threshold. It is reasonable that we should set the limit at least equal to the number of edges $|E|$. In this case, each message has enough time to reach out to all vertices in the graph. 
+
+In summary, we have algorithm \ref{alg4: loopy belief} to shortly describe loopy belief propagation. We first initialize all messages using factors on each edge, these first messages on an edge are similar in both directions. Then we repeatedly send out messages all over the graph at the same time before we reach the threshold condition. With the same logic in algorithm \ref{alg4: max-sum}, the complexity of loopy belief propagation merely depends on the sending message process. In this case, the complexity exponentially increases with threshold value. Suppose we set the threshold to be the number of edges, then we have the cost of the algorithm is $\mathcal{O}(|V|^3)$. 
+
+\begin{algorithm}[H]
+	\caption{Loopy belief propagation}
+	\begin{algorithmic}[1]
+		\Function{Loopy\_Belief}{$\mathcal{G}, y_L$}
+		\For{$(i,j) \in E$}
+		\State $\psi[X_i, X_j] = \max_{X_i}{\left( \ln{(\phi_{i,j})} \right)}$
+		\State $\psi[X_j, X_i] = \psi[X_i, X_j]$
+		\EndFor
+		\State loop\_count = 0
+		\While{loop\_count $<$ threshold}
+			\For{$(i,j) \in E$}
+				\State{$\psi[X_i, X_j] = \max_{X_i} \left( 
+					\phi_{i,j} \sum_{k \in ne(i)/j} {\ln{(\psi[X_k, X_i])}}
+					\right)$}
+				\State{$\psi[X_j, X_i] = \max_{X_j} \left( 
+					\phi_{j,i} \sum_{k \in ne(j)/i} {\ln{(\psi[X_k, X_j])}}
+					\right)$}
+			\EndFor
+		\State loop\_count $=$ loop\_count $+ 1$
+		\EndWhile
+		
+		\RETURN $\psi$
+		
+		\EndFunction
+	\end{algorithmic}
+	\label{alg4: loopy belief}
+\end{algorithm}
+
+%%%%%
+\section{Synthetic Data Analysis}
+
+We give some illustration examples on synthetic data to see how our discussed models work and to show the advantages when using influence index. The data is constructed in a 2-dimension euclidean space.
+
+Let's begin with chain and grid forms of graph in figure \ref{fig4: synthetic data: chain and grid}. We have 2 types of graph here. A chain of 10 continuously connected vertices and a grid of $(3\times 9)$ vertices. The data are equally separated and the labeled data are distributed to the left and right sides on each graph giving a bunch of unlabeled data in between. So any set of vertical edges would be our separation boundary. So these options are treated equally in mincut approach and conventional graphical model and they prefer the nearest boundary of one of the labeled groups, figure \ref{fig4b: synthetic data: chain and grid} and \ref{fig4c: synthetic data: chain and grid}. In contrast, the graphical model using the influence index does better when choosing the separation near the centre of the graph, where the summations of total weight to both groups of positive and negative labels are nearly balance, figure \ref{fig4d: synthetic data: chain and grid}. Notice that in graphical model, the chain graph is inferred by max-sum algorithm and the grid graph is by loopy belief propagation.
+
+\begin{figure}[t!]
+	\centering
+	\captionsetup[subfigure]{justification=centering}
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\input{data/synthetic_chain_grid_1}
+		\caption{Input data}
+		\label{fig4a: synthetic data: chain and grid}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\input{data/synthetic_chain_grid_2}
+		\caption{Mincut approach}
+		\label{fig4b: synthetic data: chain and grid}
+	\end{subfigure}
+
+	\hfill
+	
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\input{data/synthetic_chain_grid_3}
+		\caption{Conventional \\ graphical model}
+		\label{fig4c: synthetic data: chain and grid}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.45\textwidth}
+		\centering
+		\input{data/synthetic_chain_grid_4}
+		\caption{Graphical model \\ using Influence index}
+		\label{fig4d: synthetic data: chain and grid}
+	\end{subfigure}
+
+	\caption{Inference in synthetic data forms a chain and grid of vertices.}
+	\label{fig4: synthetic data: chain and grid}
+\end{figure}
+
+Continue to examine more on the case of loopy belief propagation. From section \ref{subsection: influence and loopy belief}, we have known that it is possible to detect when a message is balanced in the sending process immediately with max-sum algorithm. But with loopy belief propagation we need to wait until this process is finished and only be checked in equal condition when summing up all the messages on each node. In figure \ref{fig4: synthetic data: circle} we have a circle graph with 14 vertices equally separated, which represents a simplified loop in arbitrary graph. With this form of graph, any combination of 2 edges on upper and lower semicircles is a valid boundary to separate the label groups. The influence index still keeps getting a good separation, figure \ref{fig4d: synthetic data: circle}. What we pay attention to here is the conventional loop belief propagation in different iterations. The third iteration, figure \ref{fig4b: synthetic data: circle}, messages are on the way to send out on both sides. If we get the results right there, it seems good. But actually, the messages have not fully spread through the graph yet and this is only a lucky decision that we rarely have. So if we continue the loop, from iteration fourth to seventh, figure \ref{fig4c: synthetic data: circle}, we have a mix of equal messages from both sides then the decision is set to the default value, negative label in this case. Besides, the interesting thing is if we continue the process many times after then, where all the messages have been received all over the graph and resent again, we still have the same result at seventh iteration. The reason is when the new route of messages starts to send again and sum all the messages sent to one vertex, it will sum up with the old one. Then more or less, both directions balance themselves, we have equal results.
+
+\begin{figure}[t!]
+	\centering
+	\captionsetup[subfigure]{justification=centering}
+	\begin{subfigure}[b]{0.24\textwidth}
+		\centering
+		\input{data/synthetic_circle_1}
+		\caption{Input data}
+		\label{fig4a: synthetic data: circle}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.24\textwidth}
+		\centering
+		\input{data/synthetic_circle_2}
+		\caption{After 3 iterations}
+		\label{fig4b: synthetic data: circle}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.24\textwidth}
+		\centering
+		\input{data/synthetic_circle_3}
+		\caption{After 7 iterations}
+		\label{fig4c: synthetic data: circle}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.24\textwidth}
+		\centering
+		\input{data/synthetic_circle_4}
+		\caption{Influence index}
+		\label{fig4d: synthetic data: circle}
+	\end{subfigure}
+	\caption{Graphical inference in a graph forms a circle of vertices.}
+	\label{fig4: synthetic data: circle}
+\end{figure}
+
+Lastly, we want to see whether all the things we have made are working on our data distribution assumption. Then we only compare the mincut approach and the graphical model using influence index. In figure \ref{fig4: synthetic data: normal distribution 1}, we have a set of 150 instances made from two normal distributions, $\mathcal{N}(1, 0.6^2)$ for positive and $\mathcal{N}(0, 0.6^2)$ for negative label. The labels were equivalently distributed, with 75 instances including 7 labeled and 68 unlabeled for each. The mincut approach, figure \ref{fig4b: synthetic data: normal distribution 1}, gives us a neat boundary of the separation which hardly divides the center density of each group. The graphical model, figure \ref{fig4c: synthetic data: normal distribution 1}, returns in a tangled boundary. Some measurements of this result are in table \ref{table4: synthetic normal 1}. There is not much to be concluded here, where both models are on track to recognize the boundary and the mixing region is still small.
+
+\begin{figure}[ht!]
+	\centering
+	\captionsetup[subfigure]{justification=centering}
+	\begin{subfigure}[b]{0.31\textwidth}
+		\centering
+		\input{data/synthetic_normal_1}
+		\caption{True data}
+		\label{fig4a: synthetic data: normal distribution 1}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.31\textwidth}
+		\centering
+		\input{data/synthetic_normal_2}
+		\caption{Mincut approach}
+		\label{fig4b: synthetic data: normal distribution 1}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.31\textwidth}
+		\centering
+		\input{data/synthetic_normal_3}
+		\caption{Graphical model}
+		\label{fig4c: synthetic data: normal distribution 1}
+	\end{subfigure}
+	\caption[Inference outputs on $\mathcal{N}(0, 0.6^2)$ and $\mathcal{N}(1, 0.6^2)$.]{Inference outputs for 150 instances of $\mathcal{N}(0, 0.6^2)$ and $\mathcal{N}(1, 0.6^2)$---7 labeled and 68 unlabeled for each label.}
+	\label{fig4: synthetic data: normal distribution 1}
+\end{figure}
+
+\begin{table}[ht!]
+	\centering
+	\captionsetup{justification=centering}
+	\caption{Measurement of inferences on $\mathcal{N}(0, 0.6^2)$ and $\mathcal{N}(1, 0.6^2)$.}
+	\makebox[\textwidth][c]{
+		\begin{tabular}{ c|ccc|ccc }
+			\multirow{2}{*}{Label} & Precision & Recall & F1 & Precision & Recall & F1\\
+			\cline{2-7}
+			& \multicolumn{3}{c}{\textbf{Mincut approach}} & \multicolumn{3}{c}{\textbf{Graphical model}} \\
+			\hline
+			
+			$-1$ & 0.88 & 0.87 & 0.87 
+			& 0.87 & 0.91 & 0.89 \\  % 2
+			$+1$ & 0.87 & 0.88 & 0.88 
+			& 0.90 & 0.87 & 0.89 \\
+			\cline{1-7}
+			avg. & 0.88 & 0.88 & 0.87 
+			& 0.89 & 0.89 & 0.89 \\
+			\hline
+	\end{tabular}}
+	\label{table4: synthetic normal 1}
+\end{table}
+
+Now we twist 2 distributions and let them bend more with $\mathcal{N}(0, 0.8^2)$ and $\mathcal{N}(1, 0.8^2)$ on the same set up. The results are in figure \ref{fig4: synthetic data: normal distribution 2}. The true data regions are more chaotic, figure \ref{fig4a: synthetic data: normal distribution 2}, and the mincut approach appears to be shrink to positive region, figure \ref{fig4b: synthetic data: normal distribution 2}. The graphical model using influence index, figure \ref{fig4c: synthetic data: normal distribution 2}, seems to have better match in shape of out true data. The estimation indices in table \ref{table4: synthetic normal 2} also shows us the same view of this illustration. If we try to squeeze these distributions more, the objective condition will be violated and the models have nothing to deal with the case.
+
+\begin{figure}[ht!]
+	\centering
+	\captionsetup[subfigure]{justification=centering}
+	\begin{subfigure}[b]{0.31\textwidth}
+		\centering
+		\input{data/synthetic_normal_4}
+		\caption{True data}
+		\label{fig4a: synthetic data: normal distribution 2}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.31\textwidth}
+		\centering
+		\input{data/synthetic_normal_5}
+		\caption{Mincut approach}
+		\label{fig4b: synthetic data: normal distribution 2}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.31\textwidth}
+		\centering
+		\input{data/synthetic_normal_6}
+		\caption{Graphical model}
+		\label{fig4c: synthetic data: normal distribution 2}
+	\end{subfigure}
+	\caption[Inference outputs on $\mathcal{N}(0, 0.8^2)$ and $\mathcal{N}(1, 0.8^2)$.]{Inference outputs for 150 instances of $\mathcal{N}(0, 0.8^2)$ and $\mathcal{N}(1, 0.8^2)$---7 labeled and 68 unlabeled for each label.}
+	\label{fig4: synthetic data: normal distribution 2}
+\end{figure}
+
+\begin{table}[ht!]
+	\centering
+	\captionsetup{justification=centering}
+	\caption{Measurement of inferences on $\mathcal{N}(0, 0.8^2)$ and $\mathcal{N}(1, 0.8^2)$.}
+	\makebox[\textwidth][c]{
+		\begin{tabular}{ c|ccc|ccc }
+			\multirow{2}{*}{Label} & Precision & Recall & F1 & Precision & Recall & F1\\
+			\cline{2-7}
+			& \multicolumn{3}{c}{\textbf{Mincut approach}} & \multicolumn{3}{c}{\textbf{Graphical model}} \\
+			\hline
+			
+			$-1$ & 0.76 & 0.80 & 0.78
+			& 0.82 & 0.87 & 0.85 \\  % 2
+			$+1$ & 0.79 & 0.75 & 0.77
+			& 0.86 & 0.82 & 0.84 \\
+			\cline{1-7}
+			avg. & 0.78 & 0.78 & 0.78 
+			& 0.84 & 0.84 & 0.84 \\
+			\hline
+	\end{tabular}}
+	\label{table4: synthetic normal 2}
+\end{table}
+
+To give more demonstrations for graphical models is a reasonable replacement for the mincut approach, and to examine our graph-based models in practical data, the next section gives us the experimental results taken on some common data sets.
+
+%%%%%
+\section{Experimental Results}
+In this section, we evaluate our graph-based models by both views of application: transductive semi-supervised learning when predicting unlabeled data in section \ref{subsection: exp ssl} and in compare with some supervised learning in section \ref{subsection: exp sl}. 
+
+In all data cases, we continue used the splitting ratio of labeled and unlabeled data on train set from section \ref{sec2: exp results}. Because the learning methods are transductive, we entirely treat the data set as train data. Then using a split we separate the data set into labeled and unlabeled set. Figure \ref{fig3: data preparing process} illustrates this overall splitting process.
+\begin{figure}[ht!]
+	\centering
+	\begin{tikzpicture}[scale=0.8]
+	\draw (0,0) rectangle (10,0.5) node[midway]{};
+	\draw[dashed] (6,0) -- (6,0.5);
+	
+	\draw node[draw=none, xshift=-1cm, yshift=1.1cm, align=right] {\footnotesize \textbf{Split}};
+	\draw node[draw=none, xshift=-1cm, yshift=.2cm] {\textbf{\footnotesize Data set}};
+	
+	\draw [decorate,decoration={brace,amplitude=10pt}, yshift=.1cm]
+	(0,.5) -- (6,.5) node [black,midway,yshift=0.6cm] {\footnotesize Unlabeled set (x\%)};
+	\draw [decorate,decoration={brace,amplitude=10pt}, yshift=.1cm]
+	(6,.5) -- (10,.5) node [black,midway,yshift=0.6cm] {\footnotesize Labeled set ((100-x)\%)};
+	
+	\end{tikzpicture}
+	\caption{The split-x process in specific data cases for graph-based models.}
+	\label{fig3: data preparing process}
+\end{figure}
+
+Continue with similarity measure, there were 3 types of function in used including Euclidean, cosine and Gaussian kernel using default bandwidth equals to number of features. As graph sparsity methods are described in previous section \ref{section3: Graph Construction}, the experiments constructed three different kinds of graph with some modifies
+\begin{description}
+	\item[kNN graph:] Search for the most k similar vertices. The search range for k was $[1, 10]$. In the case of sparse graph, it is possible to have a component with all data that are unlabeled. We bypass this problem by constraining that there must be at least one labeled data in neighbor search.
+	
+	\item[MST tree:] Construct a maximum spanning tree on $\mathcal{G}$. The greedy Prim algorithm \parencite{6773228} was implemented. %The complexity of this algorithm is $\mathcal{O}(|E| log(n))$.
+	
+	\item[kNN-MST graph:] Construct a kNN graph first, then find a MST tree for each component of this kNN graph.
+\end{description}
+
+We only present the inference results of the mincut approach and graphical model using the influence index, we now short its name to the graphical model. The reason is that the conventional graphical model for our problem is not a completed one, it only works on a tree. Moreover, as has been shown in previous section, it does not have the adaption to our data assumption. Hence more or less, even with only the tree construction, it is no better than the mincut approach. Besides that, we have conducted the evaluation on the randomized mincut approach, section \ref{section3: mincut approach}, and it did not turn well either. The complete output of experiments and more details about the data resources and experiment reproduction are described in appendix \ref{appx: Experiments Resources}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Semi-Supervised Evaluation}
+\label{subsection: exp ssl}
+
+The semi-supervised evaluation considers the ability of models to predict the unlabeled data in various scaling size of unlabeled set. The model learns all data instances and predicts the label for the unlabeled set. For each experimental data set, the experiment ran on 3 splits, split-70, split-90 and split-97, and the result was an average of 5-folds cross validation. In total we have 3 split sizes and 5-folds cross validation, $(3\times5) = 15$ evaluations for each model configuration.
+
+\subsubsection*{Abalone and Digit data}
+Abalone data was set on a binary task that determines the age range of abalone is $[5, 9]$ or $[10, 15]$ with 3842 instances, 7 features. The Digit data task was to clarify whether an $8\times8$ digit image, 64 features, is odd or even digit with 1797 instances. Both data were set on Euclidean similarity and Gaussian kernel with all three graph sparsity functions. Here we have 2 data cases, 2 similarity measurements, 3 graph types, $(2 \times 2 \times 3) = 12$ configurations. 
+
+The experimental result of Abalone data using Euclidean similarity is in table \ref{table4: exp ssl abalone}, the trend is similar with Gaussian kernel. At first glance, we can observe that the mincut approach has the equivalent or better performance in case of split-70, especially with kNN graph. Here the kNN graph also illustrates its lead over MST and kNN-MST graphs. The situation changes when we significantly shrink the labeled size with split-97. Inform that the split-70 specifies that the unlabeled size is about 2 times bigger than the labeled one, while the split-97 means the difference is now about 32 times. In this case, the graphical model using kNN graph outperforms the mincut approach. Also the MST and kNN-MST graphs take off the gap with kNN graph and the results are nearly the same on both inference models.
+
+We will continue with Digit data. In the same way, table \ref{table4: exp ssl digit} shows the results of Digit data with Euclidean similarity.  Take a look at graphical model, we may allegedly observe that, in kNN graph, the loopy propagation could not be converged on a group of vertices. This pushes the recall on positive label high up, but downgrades precision significantly compared with the mincut approach, and the reverse situation is applied to negative label. The equivalent outputs are held on MST and kNN-MST graph.
+
+\subsubsection*{20Newsgroups data}
+The 20Newsgroups data was constructed with tf-idf vectorization, the size of vocabulary reduced to 600 words by sum of tf-idf. The original data set consists of many groups of different topic labels. Here we set up an experiment between comp versus rec groups, in 8870 instances. We only use cosine similarity measurement with 3 types of graph construction. Thus we have 1 classifier, 1 similarity measurement, 3 graph types, $(1 \times 1 \times 3) = 3$ configurations.
+
+The results are in table \ref{table4: exp ssl news}. This time, the performance of kNN graph prevails the other two graphs in both mincut approach and graphical model. With split-70 and split-90, we do not have much to say. But there in split-97, the mincut approach has fallen to a degenerate solution when vastly going for the negative label. If we solely examine the MST and kNN-MST graphs, the slightly better outcome comes from the mincut approach.  
+% The situation is the same in comp versus sci task. Now we only examine the split-97 of this classifier in table \ref{table4: exp ssl news2 0.97}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Supervised Evaluation}
+\label{subsection: exp sl}
+
+In the same data setup of semi-supervised evaluation, for each data set, we plugin two supervised models including Logistic Regression and Support Vector Machines (SVM, using RBF kernel, $\gamma=\frac{1}{\#features}$) to predict the unlabeled data. In total we have 2 added supervised models, 3 split sizes and 5-folds cross validation, $(2 \times 3 \times 5) = 30$ additional evaluations for each data case. 
+
+From the previous evaluation, we would claim the presume that with the carefully selected graph construction for a specific data, the graphical model can have the advantage over the mincut approach. Therefore, in this section, we only compare the supervised model with the graphical model. We also assume that we already evaluated the graph construction methods and utilize the best one here. 
+
+In table \ref{table4: exp sl abalone} we have the comparison on Abalone data, the graphical model works on Euclidean kNN graph. The table starts with the split-70 where we have merely equivalent outcomes. Then go down with the split-90 and split-97, the logistic regression has the most recognizable downgrade. The graphical model has its solid performance and states first on split-97 in comparison with the other two. A similar result for Digit data is in table \ref{table4: exp sl digit} with Euclidean kNN-MST graph for graphical model. But at this time, the logistic regression has been downed from the beginning. Finally, the result of 20newsgroup data is in table \ref{table4: exp sl news}, graphical model utilizes cosine kNN graph. The supervised keeps its benefits in split-70 and split-90. In split-97, SVM has fallen into a degenerate trap when predicting most of the label for negative. It is the same situation with kNN graph of the mincut approach for this data case.
+
+\pagebreak
+
+\input{data/ssl_abalone}
+
+\input{data/ssl_digit}
+
+\input{data/ssl_news}
+
+\input{data/sl_abalone}
+
+\input{data/sl_digit}
+
+\input{data/sl_news}

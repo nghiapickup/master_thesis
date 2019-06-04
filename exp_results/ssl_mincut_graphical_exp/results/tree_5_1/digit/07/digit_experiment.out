@@ -1,0 +1,36 @@
+
+graphical_tree_euclidean_mst
+
+                precision    recall  f1-score   support
+              0      1.00      0.99      0.99    624.00
+              1      0.99      1.00      0.99    634.00
+      micro avg      0.99      0.99      0.99   1258.00
+      macro avg      0.99      0.99      0.99   1258.00
+   weighted avg      0.99      0.99      0.99   1258.00
+
+graphical_tree_gaussian_mst
+
+                precision    recall  f1-score   support
+              0      1.00      0.99      0.99    624.00
+              1      0.99      1.00      0.99    634.00
+      micro avg      0.99      0.99      0.99   1258.00
+      macro avg      0.99      0.99      0.99   1258.00
+   weighted avg      0.99      0.99      0.99   1258.00
+
+graphical_tree_euclidean_knn_mst
+
+                precision    recall  f1-score   support
+              0      1.00      0.99      0.99    624.00
+              1      0.99      1.00      0.99    634.00
+      micro avg      0.99      0.99      0.99   1258.00
+      macro avg      0.99      0.99      0.99   1258.00
+   weighted avg      0.99      0.99      0.99   1258.00
+
+graphical_tree_gaussian_knn_mst
+
+                precision    recall  f1-score   support
+              0      1.00      0.99      0.99    624.00
+              1      0.99      1.00      0.99    634.00
+      micro avg      0.99      0.99      0.99   1258.00
+      macro avg      0.99      0.99      0.99   1258.00
+   weighted avg      0.99      0.99      0.99   1258.00

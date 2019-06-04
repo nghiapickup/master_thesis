@@ -1,0 +1,24 @@
+\section*{Data Description}
+All the data were fetched from UCI repository \parencite{Dua:2017}
+\begin{description}
+	\item[Abalone data] The data consists of 7 features of abalone physical measurements like sex, length, shell weight, etc,. The task is to classify abalone by their ages. We only picked the age data in $[5, 15]$ which has more than 100 records per each class and constructed a binary classifier on the ages ranges from $[5,9]$ and $[10, 15]$. The final data contains 3842 instances---1820 negative, 2022 positive.
+	
+	\item[Digit data] The data contains 1797 instances of $8 \times 8$ images hand-written digits, 64 features. We constructed a binary classifier between odd and even digits -- 891 negative, 906 positive.
+		
+	\item[20Newsgroup data, 20news-bydate version] This is a collection of nearly 20,000 newsgroup documents, divided into 20 different groups. In total, the origin set consists of 18774 instances with a vocabulary size of 61188 words. In our experiment, we only set binary classifiers for the major groups. So we constructed 
+	\begin{itemize}
+		\item comp versus rec groups, 8870 instances---4891 negative, 3979 positive
+		\item comp versus sci groups, 8843 instances---4891 negative, 3952 positive
+		\item comp versus talk groups, 8144 instances---4891 negative, 3253 positive
+	\end{itemize}
+\end{description}
+
+\section*{Experiments Reproduction}
+All of the resources are uploaded in an online repository. Details are also described on each link. We can reconstruct the experiments through them. The experiment was conducted on Python 3.6 programming language \parencite{python3.6}, libraries Numpy \parencite{numpy}, Scikit-Learn \parencite{scikit-learn} and Igraph \parencite{Csardi2006}.
+\begin{description}
+	\item[Mixture models] \hfill \\ \url{https://github.com/nghiapickup/ssl_multinomial}
+	\item[Graph-based methods] \hfill \\ \url{https://github.com/nghiapickup/ssl_mincut_graphical_model}
+\end{description}
+
+\section*{Complete Experimental Results}
+The complete set of experimental results is at \url{https://github.com/nghiapickup/master_thesis}

@@ -1,0 +1,19 @@
+
+graphical_loop_euclidean_knn
+
+                precision    recall  f1-score   support
+              0      0.69      0.79      0.73   1274.00
+              1      0.78      0.67      0.72   1416.00
+      micro avg      0.73      0.73      0.73   2690.00
+      macro avg      0.74      0.73      0.73   2690.00
+   weighted avg      0.74      0.73      0.73   2690.00
+
+
+graphical_loop_gaussian_knn
+
+                precision    recall  f1-score   support
+              0      0.68      0.82      0.74   1274.00
+              1      0.80      0.65      0.71   1416.00
+      micro avg      0.73      0.73      0.73   2690.00
+      macro avg      0.74      0.73      0.73   2690.00
+   weighted avg      0.75      0.73      0.73   2690.00

@@ -1,0 +1,79 @@
+\begin{table}[t!]
+	\centering
+	\captionsetup{justification=centering}
+	\caption{Semi-supervised evaluation, Digit data using Euclidean similarity.}
+	\label{table4: exp ssl digit}
+	\makebox[\textwidth][c]{
+		\begin{tabular}{ c|c|ccc|ccc }
+			\multirow{2}{*}{Graph type} & \multirow{2}{*}{Label} & Precision & Recall & F1 & Precision & Recall & F1\\
+			\cline{3-8}
+			&& \multicolumn{3}{c}{\textbf{Mincut approach}} & \multicolumn{3}{c}{\textbf{Graphical model}} \\
+			\hline
+			
+			\multicolumn{2}{c}{} & \multicolumn{6}{c}{Split-70,  data number labeled-unlabeled : 539-1258}\\
+			
+			\hline
+			\multirow{3}{*}{kNN} 
+			& $-1$ & 1.00 & 0.99 & 0.99 & 1.00 & 0.99 & 0.99 \\
+			& $+1$ & 0.99 & 1.00 & 0.99 & 0.99 & 1.00 & 0.99 \\
+			\cline{2-8}
+			& avg. & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 \\
+			\hline
+			\multirow{3}{*}{MST} 
+			& $-1$ & 1.00 & 0.99 & 0.99 & 1.00 & 0.99 & 0.99 \\
+			& $+1$ & 0.99 & 1.00 & 0.99 & 0.99 & 1.00 & 0.99 \\
+			\cline{2-8}
+			& avg. & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 \\
+			\hline
+			\multirow{3}{*}{kNN-MST} 
+			& $-1$ & 1.00 & 0.99 & 0.99 & 1.00 & 0.99 & 0.99 \\
+			& $+1$ & 0.99 & 1.00 & 0.99 & 0.99 & 1.00 & 0.99 \\
+			\cline{2-8}
+			& avg. & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 \\
+			\hline
+			
+			\multicolumn{2}{c}{} & \multicolumn{6}{c}{Split-90,  data number labeled-unlabeled : 179-1618}\\
+			
+			\hline
+			\multirow{3}{*}{kNN} 
+			& $-1$ & 0.98 & 0.98 & 0.98 & 0.93 & 0.84 & 0.88 \\
+			& $+1$ & 0.98 & 0.98 & 0.98 & 0.86 & 0.94 & 0.90 \\
+			\cline{2-8}
+			& avg. & 0.98 & 0.98 & 0.98 & 0.89 & 0.89 & 0.89 \\
+			\hline
+			\multirow{3}{*}{MST} 
+			& $-1$ & 0.99 & 0.98 & 0.99 & 0.99 & 0.98 & 0.99 \\
+			& $+1$ & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 \\
+			\cline{2-8}
+			& avg. & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 \\
+			\hline
+			\multirow{3}{*}{kNN-MST} 
+			& $-1$ & 0.99 & 0.98 & 0.99 & 0.99 & 0.98 & 0.99 \\
+			& $+1$ & 0.98 & 0.99 & 0.99 & 0.98 & 0.99 & 0.99 \\ 
+			\cline{2-8}
+			& avg. & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 \\
+			\hline
+			
+			\multicolumn{2}{c}{} & \multicolumn{6}{c}{Split-97,  data number labeled-unlabeled : 53-1744}\\
+			
+			\hline
+			\multirow{3}{*}{kNN} 
+			& $-1$ & 0.93 & 0.97 & 0.95 & 0.91 & 0.77 & 0.83 \\
+			& $+1$ & 0.97 & 0.93 & 0.95 & 0.80 & 0.92 & 0.86 \\
+			\cline{2-8}
+			& avg. & 0.95 & 0.95 & 0.95 & 0.86 & 0.84 & 0.84 \\
+			\hline
+			\multirow{3}{*}{MST} 
+			& $-1$ & 0.90 & 0.98 & 0.93 & 0.90 & 0.98 & 0.93 \\
+			& $+1$ & 0.98 & 0.88 & 0.93 & 0.98 & 0.88 & 0.93 \\
+			\cline{2-8}
+			& avg. & 0.94 & 0.93 & 0.93 & 0.94 & 0.93 & 0.93 \\
+			\hline
+			\multirow{3}{*}{kNN-MST} 
+			& $-1$ & 0.94 & 0.96 & 0.95 & 0.94 & 0.96 & 0.95 \\
+			& $+1$ & 0.96 & 0.94 & 0.95 & 0.96 & 0.94 & 0.95 \\
+			\cline{2-8}
+			& avg. & 0.95 & 0.95 & 0.95 & 0.95 & 0.95 & 0.95 \\
+			\hline
+	\end{tabular}}
+\end{table}

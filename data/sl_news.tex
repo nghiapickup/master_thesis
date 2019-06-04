@@ -1,0 +1,37 @@
+\begin{table}[t!]
+	\centering
+	\captionsetup{justification=centering}
+	\caption{Supervised evaluation, 20Newsgroups data, comp versus rec.}
+	\makebox[\textwidth][c]{
+		\begin{tabular}{ c|ccc|ccc|ccc }
+			\multirow{2}{*}{Label} & Precision & Recall & F1 & Precision & Recall & F1 & Precision & Recall & F1\\
+			\cline{2-10}
+			& \multicolumn{3}{c}{\textbf{Logistic Regression}} & \multicolumn{3}{c}{\textbf{SVM}} & \multicolumn{3}{c}{\textbf{Graphical model}} \\
+			\hline
+			
+			\multicolumn{1}{c}{} & \multicolumn{9}{c}{Split-70} \\
+			\hline
+			$-1$ & 0.92 & 0.89 & 0.90 & 0.90 & 0.90 & 0.90 & 0.82 & 0.96 & 0.88 \\
+			$+1$ & 0.87 & 0.90 & 0.89 & 0.87 & 0.88 & 0.88 & 0.94 & 0.73 & 0.82 \\
+			\cline{1-10}
+			avg. & 0.89 & 0.90 & 0.90 & 0.89 & 0.89 & 0.89 & 0.88 & 0.85 & 0.85 \\
+			\hline
+			
+			\multicolumn{1}{c}{} & \multicolumn{9}{c}{Split-90} \\
+			\hline
+			$-1$ & 0.90 & 0.90 & 0.90 & 0.79 & 0.97 & 0.87 & 0.80 & 0.96 & 0.88 \\
+			$+1$ & 0.88 & 0.88 & 0.88 & 0.95 & 0.68 & 0.79 & 0.94 & 0.71 & 0.81 \\
+			\cline{1-10}
+			avg. & 0.89 & 0.89 & 0.89 & 0.87 & 0.82 & 0.83 & 0.87 & 0.84 & 0.84 \\
+			\hline
+			
+			\multicolumn{1}{c}{} & \multicolumn{9}{c}{Split-97} \\
+			\hline
+			$-1$ & 0.82 & 0.93 & 0.87 & 0.55 & 1.00 & 0.71 & 0.82 & 0.94 & 0.87 \\
+			$+1$ & 0.90 & 0.74 & 0.81 & 1.00 & 0.01 & 0.01 & 0.91 & 0.74 & 0.81 \\
+			\cline{1-10}
+			avg. & 0.86 & 0.84 & 0.84 & 0.78 & 0.50 & 0.36 & 0.86 & 0.84 & 0.84 \\
+			\hline
+	\end{tabular}}
+	\label{table4: exp sl news}
+\end{table}

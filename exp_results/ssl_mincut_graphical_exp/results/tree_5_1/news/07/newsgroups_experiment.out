@@ -1,0 +1,18 @@
+
+graphical_tree_cosine_mst
+
+                precision    recall  f1-score   support
+              0      0.82      0.83      0.83   3424.00
+              1      0.79      0.78      0.79   2785.00
+      micro avg      0.81      0.81      0.81   6209.00
+      macro avg      0.81      0.81      0.81   6209.00
+   weighted avg      0.81      0.81      0.81   6209.00
+
+graphical_tree_cosine_knn_mst
+
+                precision    recall  f1-score   support
+              0      0.82      0.83      0.83   3424.00
+              1      0.79      0.78      0.79   2785.00
+      micro avg      0.81      0.81      0.81   6209.00
+      macro avg      0.81      0.81      0.81   6209.00
+   weighted avg      0.81      0.81      0.81   6209.00

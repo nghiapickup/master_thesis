@@ -1,0 +1,84 @@
+
+nb
+
+                precision    recall  f1-score   support
+              0      0.83      0.81      0.78   1957.00
+              1      0.83      0.76      0.77   1581.00
+      macro avg      0.83      0.79      0.78   3538.00
+
+em_random
+
+                precision    recall  f1-score   support
+              0      0.81      0.92      0.86   1957.00
+              1      0.88      0.73      0.80   1581.00
+      macro avg      0.85      0.83      0.83   3538.00
+
+em_tree
+
+                precision    recall  f1-score   support
+              0      0.81      0.91      0.86   1957.00
+              1      0.87      0.74      0.80   1581.00
+      macro avg      0.84      0.82      0.83   3538.00
+
+em_kmeans
+
+                precision    recall  f1-score   support
+              0      0.81      0.92      0.86   1957.00
+              1      0.88      0.73      0.80   1581.00
+      macro avg      0.85      0.83      0.83   3538.00
+
+nb
+
+                precision    recall  f1-score   support
+              0      0.88      0.94      0.91   1956.00
+              1      0.92      0.84      0.88   1592.00
+      macro avg      0.90      0.89      0.89   3548.00
+
+em_random
+
+                precision    recall  f1-score   support
+              0      0.89      0.95      0.92   1956.00
+              1      0.93      0.85      0.89   1592.00
+      macro avg      0.91      0.90      0.90   3548.00
+
+em_tree
+
+                precision    recall  f1-score   support
+              0      0.88      0.95      0.91   1956.00
+              1      0.93      0.85      0.89   1592.00
+      macro avg      0.91      0.90      0.90   3548.00
+
+em_kmeans
+
+                precision    recall  f1-score   support
+              0      0.89      0.94      0.91   1956.00
+              1      0.93      0.85      0.89   1592.00
+      macro avg      0.91      0.90      0.90   3548.00
+
+nb
+
+                precision    recall  f1-score   support
+              0      0.91      0.96      0.94   1957.00
+              1      0.94      0.86      0.89   1301.00
+      macro avg      0.93      0.91      0.91   3258.00
+
+em_random
+
+                precision    recall  f1-score   support
+              0      0.93      0.96      0.94   1957.00
+              1      0.94      0.88      0.91   1301.00
+      macro avg      0.93      0.92      0.93   3258.00
+
+em_tree
+
+                precision    recall  f1-score   support
+              0      0.91      0.97      0.94   1957.00
+              1      0.95      0.86      0.90   1301.00
+      macro avg      0.93      0.91      0.92   3258.00
+
+em_kmeans
+
+                precision    recall  f1-score   support
+              0      0.93      0.96      0.94   1957.00
+              1      0.94      0.88      0.91   1301.00
+      macro avg      0.93      0.92      0.93   3258.00

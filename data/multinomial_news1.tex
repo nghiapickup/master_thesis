@@ -1,0 +1,35 @@
+\begin{table}[t!]
+	\centering
+	\captionsetup{justification=centering}
+	\caption{Multinomial model evaluation, 20Newsgroups data, \\f1-score measurement, comp versus rec.}
+	\makebox[\textwidth][c]{
+		\begin{tabular}{ c|cccc }
+			Label & \textbf{NB} & \textbf{EM-random} & \textbf{EM-tree} & \textbf{EM-kmeans} \\
+			\hline
+			
+			\multicolumn{1}{c}{} & \multicolumn{4}{c}{Split-70, labeled:unlabeled = 1064:2484} \\
+			\hline
+			$- 1$ & 0.83 & 0.86 & 0.87 & 0.87 \\
+			$+ 1$ & 0.77 & 0.79 & 0.82 & 0.81 \\
+			\cline{1-5}
+			avg.  & 0.80 & 0.82 & 0.85 & 0.84 \\
+			\hline
+			
+			\multicolumn{1}{c}{} & \multicolumn{4}{c}{Split-90, labeled:unlabeled = 354:3194} \\
+			\hline
+			$- 1$ & 0.78 & 0.86 & 0.86 & 0.86 \\
+			$+ 1$& 0.77 & 0.80 & 0.80 & 0.80 \\
+			\cline{1-5}
+			avg.  & 0.78 & 0.83 & 0.83 & 0.83 \\
+			\hline
+			
+			\multicolumn{1}{c}{} & \multicolumn{4}{c}{Split-97, labeled:unlabeled = 106:3442} \\
+			\hline
+			$- 1$ & 0.67 & 0.77 & 0.83 & 0.78 \\
+			$+ 1$ & 0.66 & 0.70 & 0.72 & 0.76 \\
+			\cline{1-5}
+			avg.  & 0.66 & 0.74 & 0.77 & 0.77 \\
+			\hline
+	\end{tabular}}
+	\label{table2: exp news 1}
+\end{table}

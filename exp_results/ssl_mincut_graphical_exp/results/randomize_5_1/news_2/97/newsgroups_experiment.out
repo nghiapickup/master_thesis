@@ -1,0 +1,27 @@
+
+mincut_randomize_cosine_knn
+
+                precision    recall  f1-score   support
+              0      0.56      0.95      0.71   4744.00
+              1      0.58      0.08      0.14   3834.00
+      micro avg      0.56      0.56      0.56   8578.00
+      macro avg      0.57      0.52      0.43   8578.00
+   weighted avg      0.57      0.56      0.46   8578.00
+
+svm
+
+                precision    recall  f1-score   support
+              0      0.55      1.00      0.71   4744.00
+              1      0.00      0.00      0.00   3834.00
+      micro avg      0.55      0.55      0.55   8578.00
+      macro avg      0.28      0.50      0.36   8578.00
+   weighted avg      0.31      0.55      0.39   8578.00
+
+logreg
+
+                precision    recall  f1-score   support
+              0      0.75      0.90      0.82   4744.00
+              1      0.84      0.63      0.72   3834.00
+      micro avg      0.78      0.78      0.78   8578.00
+      macro avg      0.79      0.77      0.77   8578.00
+   weighted avg      0.79      0.78      0.78   8578.00

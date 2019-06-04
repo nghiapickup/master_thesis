@@ -1,0 +1,72 @@
+
+mincut_euclidean_knn
+
+                precision    recall  f1-score   support
+              0      0.71      0.74      0.72   1638.00
+              1      0.76      0.73      0.74   1820.00
+      micro avg      0.73      0.73      0.73   3458.00
+      macro avg      0.73      0.73      0.73   3458.00
+   weighted avg      0.73      0.73      0.73   3458.00
+
+mincut_gaussian_knn
+
+                precision    recall  f1-score   support
+              0      0.71      0.74      0.72   1638.00
+              1      0.76      0.73      0.74   1820.00
+      micro avg      0.73      0.73      0.73   3458.00
+      macro avg      0.73      0.73      0.73   3458.00
+   weighted avg      0.73      0.73      0.73   3458.00
+
+mincut_euclidean_mst
+
+                precision    recall  f1-score   support
+              0      0.70      0.67      0.68   1638.00
+              1      0.71      0.74      0.73   1820.00
+      micro avg      0.71      0.71      0.71   3458.00
+      macro avg      0.71      0.70      0.70   3458.00
+   weighted avg      0.71      0.71      0.71   3458.00
+
+mincut_gaussian_mst
+
+                precision    recall  f1-score   support
+              0      0.70      0.67      0.68   1638.00
+              1      0.71      0.74      0.73   1820.00
+      micro avg      0.71      0.71      0.71   3458.00
+      macro avg      0.71      0.70      0.70   3458.00
+   weighted avg      0.71      0.71      0.71   3458.00
+
+mincut_euclidean_knn_mst
+
+                precision    recall  f1-score   support
+              0      0.69      0.66      0.67   1638.00
+              1      0.71      0.73      0.72   1820.00
+      micro avg      0.70      0.70      0.70   3458.00
+      macro avg      0.70      0.69      0.69   3458.00
+   weighted avg      0.70      0.70      0.70   3458.00
+
+mincut_gaussian_knn_mst
+
+                precision    recall  f1-score   support
+              0      0.69      0.66      0.67   1638.00
+              1      0.71      0.73      0.72   1820.00
+      micro avg      0.70      0.70      0.70   3458.00
+      macro avg      0.70      0.69      0.69   3458.00
+   weighted avg      0.70      0.70      0.70   3458.00
+
+svm
+
+                precision    recall  f1-score   support
+              0      0.69      0.74      0.71   1638.00
+              1      0.75      0.70      0.72   1820.00
+      micro avg      0.72      0.72      0.72   3458.00
+      macro avg      0.72      0.72      0.72   3458.00
+   weighted avg      0.72      0.72      0.72   3458.00
+
+logreg
+
+                precision    recall  f1-score   support
+              0      0.71      0.62      0.66   1638.00
+              1      0.69      0.77      0.73   1820.00
+      micro avg      0.70      0.70      0.70   3458.00
+      macro avg      0.70      0.69      0.69   3458.00
+   weighted avg      0.70      0.70      0.69   3458.00

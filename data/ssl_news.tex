@@ -1,0 +1,80 @@
+\begin{table}[t!]
+	\centering
+	\captionsetup{justification=centering}
+	\caption{Semi-supervised evaluation, 20Newsgroups data, comp versus rec using cosine similarity.}
+	\label{table4: exp ssl news}
+	\makebox[\textwidth][c]{
+		\begin{tabular}{ c|c|ccc|ccc }
+			\multirow{2}{*}{Graph type} & \multirow{2}{*}{Label} & Precision & Recall & F1 & Precision & Recall & F1\\
+			\cline{3-8}
+			&& \multicolumn{3}{c}{\textbf{Mincut approach}} & \multicolumn{3}{c}{\textbf{Graphical model}} \\
+			\hline
+			
+			\multicolumn{2}{c}{} & \multicolumn{6}{c}{Split-70, labeled:unlabeled = 2661:6209}\\
+			
+			\hline
+			\multirow{3}{*}{kNN}
+			& $-1$ & 0.89 & 0.84 & 0.86 & 0.82 & 0.96 & 0.88 \\
+			& $+1$ & 0.81 & 0.88 & 0.84 & 0.94 & 0.73 & 0.82 \\
+			\cline{2-8}
+			& avg. & 0.85 & 0.86 & 0.85 & 0.88 & 0.85 & 0.85 \\ 
+			\hline
+			\multirow{3}{*}{MST} 
+			& $-1$ & 0.86 & 0.80 & 0.83 & 0.82 & 0.83 & 0.83 \\
+			& $+1$ & 0.77 & 0.84 & 0.81 & 0.79 & 0.78 & 0.79 \\
+			\cline{2-8}
+			& avg. & 0.82 & 0.82 & 0.82 & 0.81 & 0.81 & 0.81 \\
+			\hline
+			\multirow{3}{*}{kNN-MST} 
+			& $-1$ & 0.86 & 0.80 & 0.83 & 0.82 & 0.83 & 0.83 \\
+			& $+1$ & 0.78 & 0.84 & 0.81 & 0.79 & 0.78 & 0.79 \\
+			\cline{2-8}
+			& avg. & 0.82 & 0.82 & 0.82 & 0.81 & 0.81 & 0.81 \\
+			\hline
+			
+			\multicolumn{2}{c}{} & \multicolumn{6}{c}{Split-90, labeled:unlabeled = 860:8010 }\\
+			
+			\hline
+			\multirow{3}{*}{kNN}
+			& $-1$ & 0.91 & 0.82 & 0.86 & 0.80 & 0.96 & 0.88 \\
+			& $+1$ & 0.80 & 0.89 & 0.85 & 0.94 & 0.71 & 0.81 \\
+			\cline{2-8}
+			& avg. & 0.85 & 0.86 & 0.85 & 0.87 & 0.84 & 0.84 \\
+			\hline
+			\multirow{3}{*}{MST} 
+			& $-1$ & 0.82 & 0.78 & 0.80 & 0.79 & 0.82 & 0.80 \\
+			& $+1$ & 0.75 & 0.79 & 0.77 & 0.77 & 0.73 & 0.75 \\
+			\cline{2-8}
+			& avg. & 0.79 & 0.79 & 0.79 & 0.78 & 0.77 & 0.78 \\
+			\hline
+			\multirow{3}{*}{kNN-MST} 
+			& $-1$ & 0.84 & 0.80 & 0.82 & 0.80 & 0.83 & 0.82 \\
+			& $+1$ & 0.77 & 0.81 & 0.79 & 0.78 & 0.75 & 0.77 \\
+			\cline{2-8}
+			& avg. & 0.80 & 0.80 & 0.80 & 0.79 & 0.79 & 0.79 \\
+			\hline
+			
+			\multicolumn{2}{c}{} & \multicolumn{6}{c}{Split-97, labeled:unlabeled = 266:8604}\\
+			
+			\hline
+			\multirow{3}{*}{kNN} 
+			& $-1$ & 0.56 & 0.97 & 0.71 & 0.82 & 0.94 & 0.87 \\
+			& $+1$ & 0.59 & 0.06 & 0.11 & 0.91 & 0.74 & 0.81 \\
+			\cline{2-8}
+			& avg. & 0.57 & 0.51 & 0.41 & 0.86 & 0.84 & 0.84 \\
+			\hline
+			\multirow{3}{*}{MST} 
+			& $-1$ & 0.80 & 0.77 & 0.79 & 0.77 & 0.81 & 0.79 \\
+			& $+1$ & 0.73 & 0.77 & 0.75 & 0.75 & 0.70 & 0.73 \\
+			\cline{2-8}
+			& avg. & 0.77 & 0.77 & 0.77 & 0.76 & 0.76 & 0.76 \\
+			\hline
+			\multirow{3}{*}{kNN-MST} 
+			& $-1$ & 0.81 & 0.79 & 0.80 & 0.78 & 0.82 & 0.80 \\
+			& $+1$ & 0.75 & 0.78 & 0.76 & 0.77 & 0.72 & 0.74 \\
+			\cline{2-8}
+			& avg. & 0.78 & 0.78 & 0.78 & 0.77 & 0.77 & 0.77 \\
+			\hline
+			
+	\end{tabular}}
+\end{table}

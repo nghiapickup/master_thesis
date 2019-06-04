@@ -1,0 +1,45 @@
+
+mincut_cosine_knn
+
+                precision    recall  f1-score   support
+              0      0.81      0.82      0.81   3424.00
+              1      0.77      0.76      0.77   2767.00
+      micro avg      0.79      0.79      0.79   6191.00
+      macro avg      0.79      0.79      0.79   6191.00
+   weighted avg      0.79      0.79      0.79   6191.00
+
+mincut_cosine_mst
+
+                precision    recall  f1-score   support
+              0      0.78      0.77      0.77   3424.00
+              1      0.72      0.72      0.72   2767.00
+      micro avg      0.75      0.75      0.75   6191.00
+      macro avg      0.75      0.75      0.75   6191.00
+   weighted avg      0.75      0.75      0.75   6191.00
+
+mincut_cosine_knn_mst
+
+                precision    recall  f1-score   support
+              0      0.77      0.78      0.77   3424.00
+              1      0.72      0.72      0.72   2767.00
+      micro avg      0.75      0.75      0.75   6191.00
+      macro avg      0.75      0.75      0.75   6191.00
+   weighted avg      0.75      0.75      0.75   6191.00
+
+svm
+
+                precision    recall  f1-score   support
+              0      0.79      0.91      0.84   3424.00
+              1      0.86      0.70      0.77   2767.00
+      micro avg      0.81      0.81      0.81   6191.00
+      macro avg      0.82      0.80      0.81   6191.00
+   weighted avg      0.82      0.81      0.81   6191.00
+
+logreg
+
+                precision    recall  f1-score   support
+              0      0.81      0.89      0.85   3424.00
+              1      0.84      0.74      0.79   2767.00
+      micro avg      0.82      0.82      0.82   6191.00
+      macro avg      0.83      0.81      0.82   6191.00
+   weighted avg      0.82      0.82      0.82   6191.00

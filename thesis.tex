@@ -1,0 +1,148 @@
+\documentclass[11pt, oneside]{book}
+\usepackage[a4paper,width=135mm,top=30mm,bottom=30mm]{geometry}
+%bindingoffset=12mm
+\usepackage[utf8]{inputenc}
+\usepackage{CJKutf8}  % Japanese support
+\usepackage{setspace}
+
+% mathematics notations
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\DeclareMathOperator{\argmin}{argmin}
+\DeclareMathOperator{\argmax}{argmax}
+
+% BibLaTex 
+\usepackage[
+	backend=biber,
+	style=ieee,
+	citestyle=ieee,
+	natbib=false,
+	url=false, 
+	doi=false,
+	arxiv=false,
+	eprint=true,
+	mincitenames=1
+]{biblatex}
+\addbibresource{../library.bib}
+
+% Style
+%%%%%%%%
+%\setcounter{tocdepth}{0} % hide all subsection from table of content
+
+% url, link
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=cyan,
+	filecolor=magenta,  
+	citecolor=cyan,    
+	urlcolor=blue,
+}
+\urlstyle{same}
+
+% header and footer
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{\thepage}
+\fancyfoot{}
+
+% environment
+%%%%%%%%
+
+% enum
+\usepackage{enumitem}
+\setlist[description]{leftmargin=\parindent,labelindent=\parindent}
+% algorithm
+\usepackage{algorithm, algcompatible}
+\usepackage[noend]{algpseudocode}
+\renewcommand{\COMMENT}[2][.6\linewidth]{%
+	\leavevmode\hfill\makebox[#1][l]{//~#2}}
+\algnewcommand\RETURN{\State \textbf{return} }
+
+% Draw
+%%%%%%%%
+
+\usepackage{tikz}
+\usepackage{verbatim}
+\usetikzlibrary{arrows,shapes}
+\tikzstyle{vertex}=[node font=\footnotesize, fill=none,circle, draw, inner sep=2pt, minimum size = 14pt]
+\tikzstyle{positive vertex}=[fill=none, circle, draw, text=blue, inner sep=0pt, minimum size = 14pt]
+\tikzstyle{negative vertex}=[fill=none, circle, draw, text=red, inner sep=0pt, minimum size = 14pt]
+\tikzstyle{edge} = [draw,line width=0.8pt,-]
+\tikzstyle{thickedge} = [draw,line width=2pt,-]
+\tikzstyle{dashedge} = [draw,thick, dashed]
+\tikzstyle{note} = [draw=none, opacity=1, align=center]
+\tikzstyle{synthetic data} = [minimum size = 5pt]
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.5}
+\pgfmathsetseed{10} 
+\tikzstyle{positive data} = [only marks, mark=+, style=ultra thick, mark size=4, color=blue]
+\tikzstyle{negative data} = [only marks, mark=-, style=ultra thick, mark size=4, color=red]
+\tikzstyle{unlabeled data} = [only marks, mark=o, mark size=2]
+
+
+% table
+\usepackage{multirow}
+
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+\begin{document}
+{
+	\restoregeometry
+	\input{titlepage}
+}	
+	
+	\frontmatter
+	\setcounter{page}{2}
+	\chapter*{Abstract}
+	\addcontentsline{toc}{chapter}{Abstract}
+	\input{abstract}
+	
+	\chapter*{Acknowledgments}
+	\addcontentsline{toc}{chapter}{Acknowledgments}
+	\input{acknowledgments}
+
+{
+	\hypersetup{linkcolor=black}
+	\tableofcontents
+	
+	\listoffigures
+	\addcontentsline{toc}{chapter}{List of Figures}
+	
+	\listoftables
+	\addcontentsline{toc}{chapter}{List of Tables}
+}
+
+	\mainmatter
+
+	\chapter{Introduction}
+	\input{chapters/introduction}
+	
+	\chapter{Multinomial Naive Bayes Models}
+	\label{chapter 2}
+	\input{chapters/chapter02}
+	
+	\chapter{Components Separation with Graph}
+	\input{chapters/chapter03}
+	
+	\chapter{Discussion}
+	\input{chapters/discussion}
+	
+	\appendix
+	\chapter{Experimental Resources}
+	\label{appx: Experiments Resources}
+	\input{chapters/appendixA}
+
+	
+	%	BIBLIOGRAPHY
+{
+	\hypersetup{linkcolor=black}
+	\printbibliography
+}
+\end{document}

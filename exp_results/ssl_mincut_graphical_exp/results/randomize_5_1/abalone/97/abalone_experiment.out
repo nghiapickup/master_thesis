@@ -1,0 +1,18 @@
+
+mincut_randomize_euclidean_knn
+
+                precision    recall  f1-score   support
+              0      0.60      0.91      0.72   1766.00
+              1      0.84      0.44      0.57   1961.00
+      micro avg      0.66      0.66      0.66   3727.00
+      macro avg      0.72      0.67      0.64   3727.00
+   weighted avg      0.72      0.66      0.64   3727.00
+
+mincut_randomize_gaussian_knn
+
+                precision    recall  f1-score   support
+              0      0.60      0.89      0.71   1766.00
+              1      0.83      0.46      0.58   1961.00
+      micro avg      0.66      0.66      0.66   3727.00
+      macro avg      0.72      0.67      0.65   3727.00
+   weighted avg      0.72      0.66      0.64   3727.00

@@ -1,0 +1,35 @@
+
+Graph-based exp, total data number
+=============================
+
+abalone 3842
+digit 1797
+newsgroups 8870
+newsgroups2 8843
+
+Multinomial exp, labeled:unlabeled number
+=============================
+
+07
+newsgroups1: comp vs rec
+x, x_l, x_u: 8870, 1064 2484
+newsgroups2: comp vs sci
+x, x_l, x_u: 8843, 1061 2476
+newsgroups3: comp vs talk
+x, x_l, x_u: 8144, 977 2280
+
+09
+newsgroups1: comp vs rec
+x, x_l, x_u: 8870, 354 3194
+newsgroups2: comp vs sci
+x, x_l, x_u: 8843, 353 3184
+newsgroups3: comp vs talk
+x, x_l, x_u: 8144, 325 2932
+
+097
+newsgroups1: comp vs rec
+x, x_l, x_u: 8870, 106 3442
+newsgroups2: comp vs sci
+x, x_l, x_u: 8843, 106 3431
+newsgroups3: comp vs talk
+x, x_l, x_u: 8144, 97 3160

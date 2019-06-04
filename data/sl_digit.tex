@@ -1,0 +1,37 @@
+\begin{table}[t!]
+	\centering
+	\captionsetup{justification=centering}
+	\caption{Supervised evaluation, Digit data.}
+	\makebox[\textwidth][c]{
+		\begin{tabular}{ c|ccc|ccc|ccc }
+			\multirow{2}{*}{Label} & Precision & Recall & F1 & Precision & Recall & F1 & Precision & Recall & F1\\
+			\cline{2-10}
+			& \multicolumn{3}{c}{\textbf{Logistic Regression}} & \multicolumn{3}{c}{\textbf{SVM}} & \multicolumn{3}{c}{\textbf{Graphical model}} \\
+			\hline
+			
+			\multicolumn{1}{c}{} & \multicolumn{9}{c}{Split-70} \\
+			\hline
+			$-1$ & 0.90 & 0.89 & 0.90 & 1.00 & 0.98 & 0.99 & 1.00 & 0.99 & 0.99 \\
+			$+1$ & 0.90 & 0.91 & 0.90 & 0.98 & 1.00 & 0.99 & 0.99 & 1.00 & 0.99 \\
+			\cline{1-10}
+			avg. & 0.90 & 0.90 & 0.90 & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 & 0.99 \\
+			\hline
+			
+			\multicolumn{1}{c}{} & \multicolumn{9}{c}{Split-90} \\
+			\hline
+			$-1$ & 0.88 & 0.86 & 0.87 & 0.98 & 0.95 & 0.97 & 0.99 & 0.98 & 0.99 \\
+			$+1$ & 0.87 & 0.88 & 0.88 & 0.96 & 0.98 & 0.97 & 0.98 & 0.99 & 0.99 \\
+			\cline{1-10}
+			avg. & 0.87 & 0.87 & 0.87 & 0.97 & 0.97 & 0.97 & 0.99 & 0.99 & 0.99 \\
+			\hline
+			
+			\multicolumn{1}{c}{} & \multicolumn{9}{c}{Split-97} \\
+			\hline
+			$-1$ & 0.83 & 0.82 & 0.82 & 0.94 & 0.88 & 0.90 & 0.94 & 0.96 & 0.95 \\
+			$+1$ & 0.83 & 0.83 & 0.83 & 0.89 & 0.94 & 0.91 & 0.96 & 0.94 & 0.95 \\
+			\cline{1-10}
+			avg. & 0.83 & 0.83 & 0.83 & 0.91 & 0.91 & 0.91 & 0.95 & 0.95 & 0.95 \\
+			\hline
+	\end{tabular}}
+	\label{table4: exp sl digit}
+\end{table}

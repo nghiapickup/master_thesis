@@ -1,0 +1,67 @@
+Setup
+---------------
+Agglomerative: average, cosine
+
+'feature_number': 600
+spliter: 70, 90 , 97 - cv for split = 5
+component search: 15, cv for search = 3
+
+test size = 40%
+====================================
+
+
+'newsgroups1': {
+    'folder_dir': data_dir['20news'],
+    'categories': [
+        'comp.os.ms-windows.misc', 'comp.sys.ibm.pc.hardware',
+        'comp.sys.mac.hardware', 'comp.windows.x',
+        'rec.autos', 'rec.motorcycles', 'rec.sport.baseball', 'rec.sport.hockey'
+    ],
+    'positive_labels': [
+        'rec.autos', 'rec.motorcycles', 'rec.sport.baseball', 'rec.sport.hockey'
+    ],
+    'feature_score': 'tfidf',
+    'feature_number': 600,
+    'normalize': 'tfidf',
+    'scale': 10000.
+},
+'newsgroups2': {
+    'folder_dir': data_dir['20news'],
+    'categories': [
+        'comp.os.ms-windows.misc', 'comp.sys.ibm.pc.hardware',
+        'comp.sys.mac.hardware', 'comp.windows.x',
+        'sci.crypt', 'sci.electronics', 'sci.med', 'sci.space'
+    ],
+    'positive_labels': [
+        'sci.crypt', 'sci.electronics', 'sci.med', 'sci.space'
+    ],
+    'feature_score': 'tfidf',
+    'feature_number': 600,
+    'normalize': 'tfidf',
+    'scale': 10000.
+},
+'newsgroups3': {
+    'folder_dir': data_dir['20news'],
+    'categories': [
+        'comp.os.ms-windows.misc', 'comp.sys.ibm.pc.hardware',
+        'comp.sys.mac.hardware', 'comp.windows.x',
+        'talk.politics.guns', 'talk.politics.mideast', 
+        'talk.politics.misc', 'talk.religion.misc'
+    ],
+    'positive_labels': [
+        'talk.politics.guns', 'talk.politics.mideast', 
+        'talk.politics.misc', 'talk.religion.misc'
+    ],
+    'feature_score': 'tfidf',
+    'feature_number': 600,
+    'normalize': 'tfidf',
+    'scale': 10000.
+},
+'reuters': {
+    'folder_dir': data_dir['reuters'],
+    'positive_labels': 'acq',
+    'feature_score': 'tfidf',
+    'feature_number': 600,
+    'normalize': 'tfidf',
+    'scale': 10000.
+}

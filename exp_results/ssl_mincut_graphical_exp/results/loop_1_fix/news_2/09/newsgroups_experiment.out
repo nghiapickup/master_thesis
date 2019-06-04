@@ -1,0 +1,9 @@
+
+graphical_loop_cosine_knn
+
+                precision    recall  f1-score   support
+              0      0.75      0.93      0.83   4402.00
+              1      0.88      0.61      0.72   3557.00
+      micro avg      0.79      0.79      0.79   7959.00
+      macro avg      0.82      0.77      0.78   7959.00
+   weighted avg      0.81      0.79      0.78   7959.00

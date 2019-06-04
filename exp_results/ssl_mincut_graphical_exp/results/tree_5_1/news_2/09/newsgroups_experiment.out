@@ -1,0 +1,36 @@
+
+graphical_tree_cosine_mst
+
+                precision    recall  f1-score   support
+              0      0.73      0.75      0.74   4402.00
+              1      0.68      0.66      0.67   3557.00
+      micro avg      0.71      0.71      0.71   7959.00
+      macro avg      0.70      0.70      0.70   7959.00
+   weighted avg      0.71      0.71      0.71   7959.00
+
+graphical_tree_cosine_knn_mst
+
+                precision    recall  f1-score   support
+              0      0.73      0.77      0.75   4402.00
+              1      0.69      0.65      0.67   3557.00
+      micro avg      0.72      0.72      0.72   7959.00
+      macro avg      0.71      0.71      0.71   7959.00
+   weighted avg      0.71      0.72      0.71   7959.00
+
+svm
+
+                precision    recall  f1-score   support
+              0      0.68      0.98      0.80   4402.00
+              1      0.94      0.44      0.60   3557.00
+      micro avg      0.74      0.74      0.74   7959.00
+      macro avg      0.81      0.71      0.70   7959.00
+   weighted avg      0.80      0.74      0.71   7959.00
+
+logreg
+
+                precision    recall  f1-score   support
+              0      0.79      0.89      0.84   4402.00
+              1      0.84      0.71      0.77   3557.00
+      micro avg      0.81      0.81      0.81   7959.00
+      macro avg      0.82      0.80      0.80   7959.00
+   weighted avg      0.81      0.81      0.81   7959.00
