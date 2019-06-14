@@ -6,6 +6,7 @@ abalone 3842
 digit 1797
 newsgroups 8870
 newsgroups2 8843
+newsgroups3 8144
 
 Multinomial exp, labeled:unlabeled number
 =============================
